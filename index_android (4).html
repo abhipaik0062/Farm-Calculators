@@ -1,0 +1,3304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, viewport-fit=cover">
+<title>Abhi Farming Calculator App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil: #4A3323;
+    --soil-dark: #34231A;
+    --field: #2F6B3C;
+    --field-dark: #234F2C;
+    --wheat: #E8A93D;
+    --wheat-dark: #C68B24;
+    --cream: #FBF3DF;
+    --paper: #FFFFFF;
+    --ink: #23281F;
+    --line: #D9CBA8;
+    --danger: #A6402E;
+    --danger-dark: #832F21;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Baloo 2', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body{
+    padding: 18px 14px 50px;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .top-band{
+    background: var(--field);
+    color: #fff;
+    border-radius: 18px;
+    padding: 20px 18px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 0 var(--field-dark);
+  }
+  .top-band h1{
+    margin: 6px 0 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+  }
+  .top-band p{
+    margin: 6px 0 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.92;
+  }
+
+  /* Tabs */
+  .tabs{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 6px;
+  }
+  .tab-btn{
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--soil);
+    padding: 12px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    line-height: 1.25;
+  }
+  .tab-btn.active{
+    background: var(--field);
+    color: #fff;
+  }
+
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 16px 18px;
+    margin-bottom: 16px;
+  }
+  .card h2{
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color: var(--soil);
+  }
+  .card h2 .dot{
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--wheat);
+    flex-shrink:0;
+  }
+
+  .time-row{
+    display:flex;
+    gap: 6px;
+  }
+  select, input[type="number"], input.time-field{
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-align:center;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 2px;
+    background: var(--cream);
+    color: var(--ink);
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 0;
+  }
+  input[type="number"], input.time-field{
+    appearance: textfield;
+    -webkit-appearance: textfield;
+    caret-color: var(--field);
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button{
+    opacity: .65;
+  }
+  select:focus, input:focus{
+    outline: 3px solid var(--wheat);
+    border-color: var(--wheat-dark);
+  }
+  .unit-label{
+    text-align:center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--soil);
+    opacity: 0.75;
+    margin-top: 4px;
+  }
+  .field-col{ flex:1; min-width:0; }
+
+  .btn{
+    display:block;
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 17px 10px;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+  .btn-calc{
+    background: var(--field);
+    box-shadow: 0 5px 0 var(--field-dark);
+  }
+  .btn-calc:active{
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--field-dark);
+  }
+  .btn-reset{
+    background: var(--danger);
+    box-shadow: 0 5px 0 var(--danger-dark);
+  }
+  .btn-reset:active{
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--danger-dark);
+  }
+  .btn-add{
+    background: var(--wheat);
+    color: var(--soil-dark);
+    box-shadow: 0 5px 0 var(--wheat-dark);
+    font-size: 1.1rem;
+  }
+  .btn-add:active{
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--wheat-dark);
+  }
+
+  #result1, #result2{
+    display:none;
+    background: var(--wheat);
+    border: 2px solid var(--wheat-dark);
+    border-radius: 18px;
+    padding: 20px 16px;
+    text-align:center;
+    margin-bottom: 16px;
+  }
+  .result-label{
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--soil-dark);
+    margin: 0 0 6px;
+  }
+  .result-big{
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--soil-dark);
+    line-height: 1.3;
+  }
+
+  #errorBox1, #errorBox2{
+    display:none;
+    background: #FBE4DF;
+    border: 2px solid var(--danger);
+    color: var(--danger-dark);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align:center;
+    margin-bottom: 16px;
+  }
+
+  .shift-row{
+    display:flex;
+    align-items:flex-end;
+    gap: 8px;
+    margin-bottom: 14px;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 14px;
+  }
+  .shift-row:last-of-type{
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 6px;
+  }
+  .shift-inputs{
+    display:flex;
+    gap: 6px;
+    flex: 1;
+  }
+  .shift-label{
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--soil);
+    margin-bottom: 8px;
+  }
+  .remove-btn{
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .calculator-card{overflow:hidden;}
+
+  .calculator{
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+  }
+
+  .calc-display{
+    width:100%;
+    box-sizing:border-box;
+    height:76px;
+    border:2px solid var(--primary);
+    border-radius:16px;
+    background:#111;
+    color:#fff;
+    font-size:2rem;
+    font-weight:800;
+    text-align:right;
+    padding:10px 16px;
+    outline:none;
+    margin-bottom:14px;
+  }
+
+  .calc-display::placeholder{color:#777;}
+  .calc-keypad{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+
+  .calc-key{
+    min-height:64px;
+    border:0;
+    border-radius:15px;
+    background:#eee;
+    color:#222;
+    font-size:1.35rem;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,.12);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .calc-key:active{transform:translateY(2px);box-shadow:none;}
+  .calc-key.operator{background:#dff0df;color:#176b2c;}
+  .calc-key.clear{background:#f2d6d6;color:#a51f1f;}
+  .calc-key.equals{background:var(--primary);color:#fff;}
+  .calc-key.zero{grid-column:span 2;}
+
+  @media(max-width:420px){
+    .calc-key{min-height:58px;font-size:1.2rem;}
+    .calc-display{height:68px;font-size:1.7rem;}
+  }
+
+
+
+  .shift-title{
+    font-size:0.9rem;
+    font-weight:700;
+    color:var(--soil);
+    margin-bottom:8px;
+  }
+  .cost-result{
+    background: var(--wheat);
+    border: 2px solid var(--wheat-dark);
+    border-radius: 18px;
+    padding: 18px 16px;
+    text-align:center;
+    margin-bottom: 14px;
+  }
+  .cost-breakdown{
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--soil-dark);
+    opacity: 0.8;
+  }
+  .cost-error{
+    display:none;
+    background:#FBE4DF;
+    border:2px solid var(--danger);
+    color:var(--danger-dark);
+    border-radius:14px;
+    padding:12px;
+    font-size:0.95rem;
+    font-weight:600;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .footer-note{
+    text-align:center;
+    font-size: 0.85rem;
+    color: var(--soil);
+    opacity: 0.75;
+    margin-top: 6px;
+  }
+
+  /* ---------- Final green/white agricultural UI ---------- */
+  body{
+    background:#f5fbf6;
+    color:#123c24;
+    max-width:100%;
+    padding:0 0 42px;
+  }
+  .top-band{
+    position:relative;
+    overflow:hidden;
+    background:#fff;
+    color:#fff;
+    border-radius:0 0 34px 34px;
+    padding:0;
+    margin:0 0 14px;
+    box-shadow:0 5px 18px rgba(18,80,42,.12);
+    text-align:center;
+  }
+  .top-band h1{
+    position:relative;
+    margin:-18px 14px 0;
+    padding:25px 18px 28px;
+    background:#11652f;
+    border-radius:55% 55% 18px 18px / 35% 35% 18px 18px;
+    font-size:clamp(1.75rem,7vw,2.5rem);
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.2px;
+    box-shadow:0 6px 0 #0a4720;
+  }
+  .top-band p{
+    margin:0;
+    padding:12px 16px 18px;
+    color:#245b36;
+    font-size:.9rem;
+    font-weight:700;
+    opacity:1;
+  }
+
+  .tabs{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin:0 12px 16px;
+    padding:6px;
+    background:#fff;
+    border:1.5px solid #cfe5d5;
+    border-radius:20px;
+    box-shadow:0 4px 14px rgba(20,90,45,.07);
+  }
+  .tab-btn{
+    min-height:64px;
+    padding:8px 5px;
+    border-radius:15px;
+    color:#14542d;
+    font-size:clamp(.78rem,3.4vw,1rem);
+    line-height:1.15;
+  }
+  .tab-btn.active{
+    background:#16803c;
+    color:#fff;
+    box-shadow:inset 0 -3px 0 #0d5b29;
+  }
+
+  .tab-panel{padding:0 12px;}
+  .card{
+    background:#fff;
+    border:1.5px solid #d2e9d8;
+    border-radius:22px;
+    padding:18px 14px 20px;
+    margin-bottom:14px;
+    box-shadow:0 4px 18px rgba(20,90,45,.06);
+  }
+  .card h2{
+    color:#104d29;
+    font-size:1.35rem;
+    margin-bottom:8px;
+  }
+  .card h2 .dot{background:#25a653;width:12px;height:12px;}
+
+  .shift-row{
+    align-items:flex-end;
+    background:#f6fbf7;
+    border:1px solid #cfe6d5;
+    border-radius:17px;
+    padding:12px 10px;
+    margin-bottom:12px;
+    border-bottom:1px solid #cfe6d5;
+  }
+  .shift-label{
+    color:#155b30;
+    font-size:1rem;
+    margin-bottom:8px;
+  }
+  .shift-inputs{gap:7px;}
+  select,input[type="number"],input.time-field{
+    border:1.8px solid #86be98;
+    background:#fff;
+    color:#123c24;
+    border-radius:13px;
+    padding:12px 3px;
+    font-size:1.08rem;
+  }
+  .unit-label{color:#155b30;font-weight:700;}
+
+  .btn{
+    border-radius:15px;
+    min-height:56px;
+    padding:14px 10px;
+    margin-bottom:12px;
+  }
+  .btn-calc{
+    background:#13773a;
+    box-shadow:0 4px 0 #0c5127;
+  }
+  .btn-add{
+    background:#fff;
+    color:#126334;
+    border:1.8px dashed #55aa72;
+    box-shadow:none;
+  }
+  .btn-reset{
+    background:#fff;
+    color:#b23a2d;
+    border:1.5px solid #e2aaa4;
+    box-shadow:none;
+  }
+
+  .cost-result{
+    background:#eaf7ed;
+    border:1.5px solid #b9dec2;
+    border-radius:20px;
+    box-shadow:none;
+  }
+  .result-label{color:#155b30;}
+  .result-big{color:#0c5b2a;font-size:clamp(1.45rem,6vw,1.9rem);}
+  .cost-breakdown{color:#326447;}
+  .cost-error{
+    background:#fff0ee;
+    border-color:#d85b4d;
+  }
+  .footer-note{color:#326447;}
+
+  @media(max-width:420px){
+    
+    .tab-btn{min-height:58px;}
+    .card{padding:16px 11px 18px;}
+  }
+
+
+  .top-band{
+    position:relative;
+    overflow:hidden;
+    background:#fff;
+    color:#fff;
+    border-radius:0 0 34px 34px;
+    padding:0;
+    margin:0 0 14px;
+    box-shadow:0 5px 18px rgba(18,80,42,.12);
+    text-align:center;
+  }
+  .harvester-header-image{
+    display:block;
+    width:100%;
+    height:270px;
+    object-fit:cover;
+    object-position:center center;
+    margin:0;
+  }
+  .header-banner{
+    position:relative;
+    margin:-18px 14px 0;
+    padding:25px 18px 23px;
+    background:#11652f;
+    border-radius:55% 55% 18px 18px / 35% 35% 18px 18px;
+    box-shadow:0 6px 0 #0a4720;
+  }
+  .header-banner h1{
+    margin:0;
+    font-size:clamp(1.75rem,7vw,2.5rem);
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .header-banner p{
+    margin:8px 0 0;
+    color:#eaf7ed;
+    font-size:.9rem;
+    font-weight:600;
+  }
+  @media(max-width:420px){
+    .harvester-header-image{height:230px;}
+    .header-banner{padding:22px 14px 20px;}
+  }
+
+
+  /* Daily Note */
+  .note-datetime{
+    text-align:center;
+    background:#eaf6ec;
+    border:1.5px solid #cfe5d5;
+    border-radius:12px;
+    padding:12px 10px;
+    margin-bottom:12px;
+    color:#14542d;
+  }
+  .note-date{ font-size:1.05rem; font-weight:800; }
+  .note-time{ font-size:1.5rem; font-weight:800; line-height:1.2; }
+  .note-sub{ font-size:.85rem; font-weight:700; color:#14542d; margin:10px 0 6px; }
+  .note-area, .note-entry-text{
+    display:block;
+    width:100%;
+    font-family:'Baloo 2', sans-serif;
+    font-size:1.02rem;
+    font-weight:500;
+    line-height:1.45;
+    color:#123c24;
+    background:#fff;
+    border:1.8px solid #86be98;
+    border-radius:13px;
+    padding:10px 12px;
+    resize:vertical;
+  }
+  .note-area{ min-height:100px; margin-bottom:4px; }
+  .note-entry-text{ min-height:48px; overflow:hidden; margin:8px 0 4px; }
+  .note-money{ display:flex; gap:8px; }
+  .note-money .field-col{ flex:1; min-width:0; }
+  .note-status{ text-align:center; font-size:.8rem; font-weight:600; color:#326447; min-height:1.2em; margin:6px 0 10px; }
+
+  .note-summary{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .note-sum-box{
+    background:#eaf6ec;
+    border:1.5px solid #cfe5d5;
+    border-radius:12px;
+    padding:10px 8px;
+    text-align:center;
+    color:#14542d;
+  }
+  .note-sum-box.wide{ grid-column:1 / -1; }
+  .note-sum-label{ font-size:.78rem; font-weight:700; opacity:.85; }
+  .note-sum-value{ font-size:1.1rem; font-weight:800; line-height:1.3; }
+
+  .note-entry{
+    background:#f6fbf7;
+    border:1.5px solid #cfe5d5;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+  }
+  .note-entry-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .note-stamp{ font-size:.9rem; font-weight:800; color:#14542d; line-height:1.25; }
+  .note-del{
+    flex-shrink:0;
+    border:none;
+    border-radius:10px;
+    background:#a6402e;
+    color:#fff;
+    font-family:'Baloo 2', sans-serif;
+    font-size:.85rem;
+    font-weight:700;
+    padding:7px 10px;
+    cursor:pointer;
+  }
+  .note-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .note-share{
+    flex-shrink:0;
+    border:none;
+    border-radius:10px;
+    background:#1f7a45;
+    color:#fff;
+    font-family:'Baloo 2', sans-serif;
+    font-size:.85rem;
+    font-weight:700;
+    padding:7px 10px;
+    cursor:pointer;
+  }
+  .note-share:active{ background:#14542d; }
+  .note-empty{ text-align:center; font-weight:600; color:#326447; padding:8px 0; }
+
+  /* Daily Note: fuel, meals, photos */
+  .note-photo-btn{
+    display:block;
+    text-align:center;
+    background:#eaf6ec;
+    border:1.8px dashed #86be98;
+    border-radius:12px;
+    color:#14542d;
+    font-family:'Baloo 2', sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    padding:11px 10px;
+    cursor:pointer;
+  }
+  .note-photo-btn:active{ background:#dcefe0; }
+  .note-photo-btn{ position:relative; overflow:hidden; }
+  input.file-hidden{
+    position:absolute !important; inset:0 !important;
+    width:100% !important; height:100% !important; min-height:0 !important;
+    opacity:0 !important; cursor:pointer; font-size:0;
+    border:0 !important; padding:0 !important; margin:0 !important;
+  }
+  .note-photos{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin-top:8px; }
+  .note-photos:empty{ display:none; }
+  .note-thumb{
+    position:relative;
+    aspect-ratio:1 / 1;
+    border-radius:10px;
+    overflow:hidden;
+    border:1.5px solid #cfe5d5;
+    background:#fff;
+  }
+  .note-thumb img{ width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
+  .thumb-x{
+    position:absolute; top:3px; right:3px;
+    width:22px; height:22px;
+    border:none; border-radius:50%;
+    background:rgba(166,64,46,.92);
+    color:#fff; font-size:.9rem; font-weight:800; line-height:1;
+    padding:0; cursor:pointer;
+  }
+  .note-datetime{ position:relative; }
+  .mm-wrap{
+    display:none; position:relative; width:100%; height:0; padding-bottom:92%;
+    margin-top:10px; border-radius:12px; overflow:hidden; border:1.5px solid #cfe5d5; background:#e8efe9;
+  }
+  .note-datetime.has-map .mm-wrap{ display:block; }
+  .note-minimap-corner{
+    position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .biz-row{ margin-bottom:10px; }
+  .biz-input{
+    display:block; width:100%; box-sizing:border-box; padding:10px 12px;
+    font-family:'Baloo 2', sans-serif; font-size:1rem; font-weight:700; color:#14542d;
+    background:#fff; border:1.5px solid #cfe5d5; border-radius:10px; outline:none;
+  }
+  .biz-input:focus{ border-color:#2f8f4e; }
+  .note-biz{ font-size:1.05rem; font-weight:800; color:#14542d; margin-bottom:2px; }
+  .note-biz:empty{ display:none; }
+  .mm-zoom{
+    display:none; position:absolute; right:8px; width:36px; height:36px; padding:0;
+    align-items:center; justify-content:center; border:none; border-radius:50%;
+    background:rgba(255,255,255,.95); color:#14542d; font-size:1.4rem; font-weight:800; line-height:1;
+    box-shadow:0 1px 4px rgba(0,0,0,.35); cursor:pointer; font-family:inherit;
+  }
+  .mm-zoom-in{ top:8px; }
+  .mm-zoom-out{ top:50px; }
+  .mm-zoom-mode{ top:92px; font-size:1.05rem !important; }
+  .mm-zoom-loc{ top:134px; font-size:1.1rem !important; }
+  .mm-zoom-loc.on{ background:#1a73e8; color:#fff; }
+  .live-map{ position:absolute; top:0; left:0; right:0; bottom:0; touch-action:none; -webkit-user-select:none; user-select:none; cursor:grab; }
+  .live-map canvas{ width:100%; height:100%; display:block; }
+  .live-map.sat canvas{ filter:saturate(1.55) contrast(1.2) brightness(1.06); }
+  .live-map.street canvas{ filter:saturate(1.25) contrast(1.08) brightness(1.02); }
+  .mm-zoom{ z-index:3; }
+  .note-datetime.has-map .mm-zoom{ display:flex; }
+  .mm-zoom:disabled{ opacity:.45; }
+  .vsheet-bg{ position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:9999; display:flex; align-items:flex-end; justify-content:center; }
+  .vsheet{ background:#fff; width:100%; max-width:560px; max-height:78vh; overflow:auto; border-radius:18px 18px 0 0; padding:14px 14px 22px; box-shadow:0 -6px 24px rgba(0,0,0,.25); }
+  .vsheet h3{ margin:0 0 4px; font-size:1.05rem; color:#14542d; }
+  .vsheet p{ margin:0 0 10px; font-size:.8rem; color:#5d6b63; }
+  .vitem{ display:flex; justify-content:space-between; align-items:center; width:100%; text-align:left; border:1.5px solid #cfe5d5; background:#f4faf5; color:#14301f; font-family:inherit; font-weight:700; font-size:.95rem; border-radius:12px; padding:11px 12px; margin-bottom:8px; cursor:pointer; }
+  .vitem small{ font-weight:600; color:#5d6b63; margin-left:10px; white-space:nowrap; }
+  .vitem.cur{ background:#14542d; color:#fff; border-color:#14542d; } .vitem.cur small{ color:#cfe5d5; }
+  .vrow{ display:flex; gap:8px; margin-top:6px; }
+  .vrow input{ flex:1; min-width:0; border:1.5px solid #cfe5d5; border-radius:10px; padding:10px; font-family:inherit; font-size:.95rem; }
+  .vsheet .plus-copy{ padding:10px 14px; }
+  .note-plus{ display:none; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .note-plus.on{ display:flex; }
+  .live-dot{ font-size:.72rem; font-weight:800; color:#fff; background:#2f8f4e; border-radius:999px; padding:2px 8px; }
+  .live-dot.off{ background:#9aa8a0; }
+  .plus-code{ font-size:1rem; font-weight:800; color:#14542d; letter-spacing:.5px; background:#eaf6ec; border:1.5px solid #cfe5d5; border-radius:8px; padding:3px 8px; user-select:all; }
+  .plus-copy{ border:none; background:#14542d; color:#fff; font-family:inherit; font-weight:700; font-size:.78rem; border-radius:8px; padding:5px 10px; cursor:pointer; }
+  .plus-copy:active{ background:#0d3a1f; }
+  .note-loc-text{ white-space:pre-line; }
+  .note-copycode{ border:none; background:#14542d; color:#fff; font-family:inherit; font-weight:700; font-size:.75rem; border-radius:8px; padding:4px 9px; margin-top:4px; cursor:pointer; }
+  .note-addr{ font-size:.78rem; font-weight:600; color:#326447; margin-top:4px; line-height:1.3; }
+  .note-loc-row{ display:none; align-items:flex-start; justify-content:space-between; gap:8px; margin-top:6px; }
+  .note-loc-row.on{ display:flex; }
+  .note-loc-text{ flex:1; font-size:.8rem; font-weight:600; color:#326447; line-height:1.3; }
+  .note-minimap{ width:104px; height:104px; border-radius:10px; border:1.5px solid #cfe5d5; object-fit:cover; flex-shrink:0; }
+  .photo-btn-row{ display:flex; gap:8px; }
+  .photo-btn-row .note-photo-btn{ flex:1; }
+  .note-city{ font-weight:700; }
+  .photo-count{ text-align:center; font-size:.75rem; font-weight:600; color:#326447; margin:6px 0 2px; }
+  .photo-viewer{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.88);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:9999; padding:16px;
+  }
+  .photo-viewer.open{ display:flex; }
+  .photo-viewer img{ max-width:100%; max-height:100%; border-radius:10px; }
+</style>
+
+<style id="exact-design-overrides">
+  :root{
+    --design-green:#2f8f3a;
+    --design-green-dark:#23752d;
+    --design-green-soft:#eaf6ec;
+    --design-border:#d7e6d9;
+    --design-text:#18351d;
+    --design-muted:#66806b;
+    --design-white:#ffffff;
+    --design-bg:#f3f7f3;
+  }
+
+  html,body{
+    margin:0!important;
+    padding:0!important;
+    background:var(--design-bg)!important;
+    color:var(--design-text)!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+  }
+
+  body{
+    min-height:100vh;
+  }
+
+  /* Compact centered app frame */
+  .app,
+  .container,
+  main,
+  .main-container,
+  .app-container{
+    box-sizing:border-box;
+  }
+
+  .app-container,
+  .container{
+    max-width:430px!important;
+    margin:0 auto!important;
+  }
+
+  /* Large harvester image at the very top */
+  .top-band{
+    line-height:0!important;
+    margin:0!important;
+    padding:max(env(safe-area-inset-top, 0px), 28px) 0 0!important;
+    background:#fff!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+    box-shadow:none!important;
+  }
+
+  .harvester-header-image{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:fill!important;
+    vertical-align:top!important;
+    object-position:center center!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+  }
+
+  .header-banner{
+    line-height:normal!important;
+    margin:0!important;
+    padding:17px 18px 16px!important;
+    background:var(--design-green)!important;
+    color:#fff!important;
+    text-align:left!important;
+    border-radius:0!important;
+  }
+
+  .header-banner h1{
+    margin:0!important;
+    font-size:22px!important;
+    line-height:1.18!important;
+    font-weight:800!important;
+    letter-spacing:-.3px!important;
+    color:#fff!important;
+  }
+
+  .header-banner p{
+    margin:6px 0 0!important;
+    font-size:12px!important;
+    line-height:1.4!important;
+    color:#effbef!important;
+    font-weight:500!important;
+  }
+
+  /* Main content */
+  main{
+    padding:12px!important;
+    background:var(--design-bg)!important;
+  }
+
+  /* Three compact navigation tabs */
+  .tabs,
+  .nav-tabs,
+  .main-tabs{
+    display:grid!important;
+    grid-template-columns:repeat(4,1fr)!important;
+    gap:6px!important;
+    margin:0 0 12px!important;
+    padding:5px!important;
+    background:#fff!important;
+    border:1px solid var(--design-border)!important;
+    border-radius:12px!important;
+    box-shadow:0 2px 8px rgba(31,85,38,.06)!important;
+  }
+
+  .tabs button,
+  .nav-tabs button,
+  .main-tabs button{
+    min-height:40px!important;
+    padding:7px 5px!important;
+    border:0!important;
+    border-radius:9px!important;
+    background:transparent!important;
+    color:#55705a!important;
+    font-size:11px!important;
+    line-height:1.1!important;
+    font-weight:700!important;
+    box-shadow:none!important;
+  }
+
+  .tabs button.active,
+  .nav-tabs button.active,
+  .main-tabs button.active{
+    background:var(--design-green)!important;
+    color:#fff!important;
+  }
+
+  /* Cards/sections */
+  section,
+  .section,
+  .card,
+  .calculator,
+  .panel{
+    border-color:var(--design-border)!important;
+    border-radius:12px!important;
+    box-shadow:0 2px 9px rgba(31,85,38,.06)!important;
+  }
+
+  h2,h3{
+    color:var(--design-text)!important;
+  }
+
+  label{
+    color:#3e5e44!important;
+    font-weight:700!important;
+    font-size:12px!important;
+  }
+
+  input,
+  select,
+  textarea{
+    width:100%!important;
+    box-sizing:border-box!important;
+    min-height:42px!important;
+    border:1px solid #cfe0d1!important;
+    border-radius:9px!important;
+    background:#fff!important;
+    color:#19341e!important;
+    outline:none!important;
+    box-shadow:none!important;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    border-color:var(--design-green)!important;
+    box-shadow:0 0 0 3px rgba(47,143,58,.12)!important;
+  }
+
+  button{
+    border-radius:9px!important;
+  }
+
+  button.primary,
+  .primary,
+  .calculate-btn,
+  .add-btn,
+  .add-shift-btn{
+    background:var(--design-green)!important;
+    color:#fff!important;
+    border:0!important;
+    font-weight:800!important;
+  }
+
+  .secondary,
+  .remove-btn{
+    background:#fff!important;
+    color:var(--design-green-dark)!important;
+    border:1px solid #bcd4bf!important;
+  }
+
+  /* Result emphasis */
+  .result,
+  .total-result,
+  .total-display{
+    background:var(--design-green-soft)!important;
+    border:1px solid #c9e2cc!important;
+    color:var(--design-green-dark)!important;
+    border-radius:10px!important;
+  }
+
+  /* Tight spacing for a compact mobile frame */
+  .form-group,
+  .input-group,
+  .field,
+  .shift{
+    margin-bottom:10px!important;
+  }
+
+  .shift{
+    background:#fbfdfb!important;
+    border:1px solid var(--design-border)!important;
+    border-radius:10px!important;
+    padding:10px!important;
+  }
+
+  /* Keep bottom navigation compact if present */
+  .bottom-nav,
+  nav.bottom-nav{
+    max-width:430px!important;
+    margin:0 auto!important;
+    border-top:1px solid var(--design-border)!important;
+    background:#fff!important;
+  }
+
+  @media (max-width:430px){
+    .harvester-header-image{
+      height:auto!important;
+      min-height:0!important;
+      max-height:none!important;
+    }
+    .header-banner h1{font-size:20px!important;}
+    main{padding:10px!important;}
+  }
+</style>
+
+</head>
+<body>
+
+  <div class="top-band">
+    <img
+      class="harvester-header-image"
+      src="https://files.catbox.moe/qzj4ud.png"
+      alt="Kubota combine harvester in a rice field"
+      loading="eager"
+      decoding="async">
+    <div class="header-banner">
+      <h1>Abhi Farming Calculator App</h1>
+      <p>Track exact work duration — hours, minutes &amp; seconds</p>
+    </div>
+  </div></div>
+    <h1>Abhi Farming Calculator App</h1>
+    <p>Track exact work duration &mdash; hours, minutes &amp; seconds</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">⏱️ Time Difference</button>
+    <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">➕ Add Total Hours</button>
+    <button class="tab-btn" id="tabBtn3" onclick="switchTab(3)">💰 Total Cost</button>
+    <button class="tab-btn" id="tabBtn4" onclick="switchTab(4)">📝 Daily Note</button>
+  </div>
+
+  <!-- TAB 1: TIME DIFFERENCE -->
+  <div class="tab-panel active" id="tabPanel1">
+
+    <div class="card">
+      <h2><span class="dot"></span> Start Time</h2>
+      <div class="time-row">
+        <div class="field-col">
+          <input class="time-field" id="startHour" type="text" min="1" max="12" inputmode="numeric" pattern="[0-9]*" aria-label="Start hour" value="00">
+          <div class="unit-label">Hour</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="startMin" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Start minute" value="00">
+          <div class="unit-label">Min</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="startSec" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Start second" value="00">
+          <div class="unit-label">Sec</div>
+        </div>
+        <div class="field-col">
+          <select id="startAmPm">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+          <div class="unit-label">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> End Time</h2>
+      <div class="time-row">
+        <div class="field-col">
+          <input class="time-field" id="endHour" type="text" min="1" max="12" inputmode="numeric" pattern="[0-9]*" aria-label="End hour" value="00">
+          <div class="unit-label">Hour</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="endMin" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="End minute" value="00">
+          <div class="unit-label">Min</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="endSec" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="End second" value="00">
+          <div class="unit-label">Sec</div>
+        </div>
+        <div class="field-col">
+          <select id="endAmPm">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+          <div class="unit-label">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorBox1"></div>
+
+    <div id="result1">
+      <p class="result-label">Total Duration</p>
+      <p class="result-big" id="durationOutput">--</p>
+    </div>
+
+    <button class="btn btn-calc" onclick="calculateDifference()">✅ Calculate</button>
+    <button class="btn btn-reset" onclick="resetTab1()">🔄 Reset / Clear</button>
+
+    <p class="footer-note">If work starts at night and ends the next morning, this is handled automatically.</p>
+  </div>
+
+  <!-- TAB 2: ADD TOTAL HOURS -->
+  <div class="tab-panel" id="tabPanel2">
+
+    <div class="card">
+      <h2><span class="dot"></span> Add Total Hours</h2>
+      <div id="shiftContainer">
+
+        <div class="shift-row">
+          <div style="flex:1;min-width:0;">
+            <div class="shift-label">Shift 1</div>
+            <div class="shift-inputs">
+              <div class="field-col">
+                <input class="shift-hours time-field" type="text" min="0" step="1" inputmode="numeric"
+                       placeholder="0" aria-label="Shift 1 hours" value="00">
+                <div class="unit-label">Hours</div>
+              </div>
+              <div class="field-col">
+                <input class="shift-minutes time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                       placeholder="0" aria-label="Shift 1 minutes" value="00">
+                <div class="unit-label">Minutes</div>
+              </div>
+              <div class="field-col">
+                <input class="shift-seconds time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                       placeholder="0" aria-label="Shift 1 seconds" value="00">
+                <div class="unit-label">Seconds</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="btn btn-add" onclick="addAnotherShift()">➕ Add Another Shift</button>
+      <button class="btn btn-calc" onclick="calculateTotalHours()">✅ Calculate Total Time</button>
+      <button class="btn btn-reset" onclick="resetShifts()">🔄 Reset / Clear</button>
+    </div>
+
+    <div id="totalHoursResult" class="cost-result">
+      <p class="result-label">Total Work Time</p>
+      <p class="result-big" id="totalHoursOutput">0 Hours, 0 Minutes, 0 Seconds</p>
+      <p class="cost-breakdown" id="totalHoursBreakdown">Add one or more shifts to calculate the total.</p>
+    </div>
+
+  </div>
+
+  <!-- TAB 3: TOTAL COST -->
+  <div class="tab-panel" id="tabPanel3">
+
+    <div class="card cost-card">
+      <h2><span class="dot"></span> Total Cost</h2>
+
+      <div class="shift-label">Total Work Time</div>
+      <div class="time-row">
+        <div class="field-col">
+          <input class="time-field" id="costHours" type="text" min="0" step="1" inputmode="numeric"
+                 pattern="[0-9]*" aria-label="Work hours" placeholder="0" value="00">
+          <div class="unit-label">Hours</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="costMinutes" type="text" min="0" max="59" step="1" inputmode="numeric"
+                 pattern="[0-9]*" aria-label="Work minutes" placeholder="0" value="00">
+          <div class="unit-label">Minutes</div>
+        </div>
+        <div class="field-col">
+          <input class="time-field" id="costSeconds" type="text" min="0" max="59" step="1" inputmode="numeric"
+                 pattern="[0-9]*" aria-label="Work seconds" placeholder="0" value="00">
+          <div class="unit-label">Seconds</div>
+        </div>
+      </div>
+
+      <div style="height:12px;"></div>
+
+      <div class="shift-label">Rate per Hour (₹)</div>
+      <input id="costRate" type="number" min="0" step="0.01" inputmode="decimal"
+             aria-label="Rate per hour" placeholder="e.g. 500"
+             style="text-align:left;padding-left:14px;">
+
+      <div style="height:12px;"></div>
+
+      <div id="costError3" class="cost-error"></div>
+
+      <div id="costResult3" class="cost-result">
+        <p class="result-label">Total Cost</p>
+        <p class="result-big" id="costOutput3">₹0.00</p>
+        <p class="cost-breakdown" id="costBreakdown3">0.00 hours × ₹0.00/hour</p>
+      </div>
+
+      <button class="btn btn-calc" onclick="calculateCost3()">💰 Calculate Total Cost</button>
+      <button class="btn btn-reset" onclick="resetCost3()">🔄 Reset / Clear</button>
+    </div>
+
+    <p class="footer-note">Total cost = total work time converted to hours × rate per hour.</p>
+  </div>
+
+  <!-- TAB 4: DAILY NOTE -->
+  <div class="tab-panel" id="tabPanel4">
+
+    <div class="card">
+      <h2><span class="dot"></span> New Note</h2>
+
+      <div class="biz-row">
+        <div class="note-sub" style="margin-top:0">🏢 Business Name</div>
+        <input id="bizName" class="biz-input" type="text" maxlength="60" placeholder="Business name" aria-label="Business name" autocomplete="off">
+      </div>
+
+      <div class="note-datetime">
+        <div class="note-biz" id="noteBiz"></div>
+        <div class="note-date" id="noteDate"></div>
+        <div class="note-time" id="noteTime"></div>
+        <div class="note-addr" id="noteAddr"></div>
+        <div class="note-plus" id="notePlus">
+          <span class="live-dot" id="liveDot">🟢 LIVE</span>
+          <span class="plus-code" id="plusCode"></span>
+          <button type="button" class="plus-copy" id="plusCopy">📋 Copy</button>
+          <button type="button" class="plus-copy" id="villageBtn">📍 Change village</button>
+        </div>
+        <div class="mm-wrap" id="mmWrap">
+          <div class="live-map sat" id="liveMap"><canvas id="liveMapCv"></canvas></div>
+          <button type="button" class="mm-zoom mm-zoom-in" id="mapZoomIn" aria-label="Zoom in">+</button>
+          <button type="button" class="mm-zoom mm-zoom-out" id="mapZoomOut" aria-label="Zoom out">&minus;</button>
+          <button type="button" class="mm-zoom mm-zoom-mode" id="mapMode" aria-label="Switch map style">🗺️</button>
+          <button type="button" class="mm-zoom mm-zoom-loc on" id="mapLocate" aria-label="My location">📍</button>
+        </div>
+      </div>
+
+      <div id="noteForm">
+        <textarea id="noteInput" class="note-area" placeholder="Write your note here..." aria-label="New note"></textarea>
+
+        <div class="note-sub">Time for this note</div>
+        <div class="time-row">
+          <div class="field-col">
+            <input id="noteH" class="time-field" type="text" min="0" inputmode="numeric" pattern="[0-9]*" aria-label="Note hours" value="00">
+            <div class="unit-label">Hours</div>
+          </div>
+          <div class="field-col">
+            <input id="noteM" class="time-field" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Note minutes" value="00">
+            <div class="unit-label">Minutes</div>
+          </div>
+          <div class="field-col">
+            <input id="noteS" class="time-field" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Note seconds" value="00">
+            <div class="unit-label">Seconds</div>
+          </div>
+        </div>
+
+        <div class="note-sub">Amount (₹)</div>
+        <div class="note-money">
+          <div class="field-col">
+            <input id="noteAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Amount">
+            <div class="unit-label">Amount</div>
+          </div>
+          <div class="field-col">
+            <select id="noteType" aria-label="Earning or expense">
+              <option value="earning">Earning</option>
+              <option value="expense">Expense</option>
+            </select>
+            <div class="unit-label">Type</div>
+          </div>
+        </div>
+
+        <div class="note-sub">⛽ Fuel Expense (Diesel)</div>
+        <div class="note-money">
+          <div class="field-col">
+            <input id="noteDP" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Diesel price per liter">
+            <div class="unit-label">Diesel Price per Liter (₹)</div>
+          </div>
+          <div class="field-col">
+            <input id="noteDQ" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Diesel quantity in liters">
+            <div class="unit-label">Diesel Quantity (Liters)</div>
+          </div>
+        </div>
+
+        <div class="note-sub">🍽️ Meal Expenses (₹)</div>
+        <div class="note-money">
+          <div class="field-col">
+            <input id="noteBF" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Breakfast price">
+            <div class="unit-label">Breakfast Price</div>
+          </div>
+          <div class="field-col">
+            <input id="noteLN" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Afternoon lunch price">
+            <div class="unit-label">Afternoon Lunch Price</div>
+          </div>
+          <div class="field-col">
+            <input id="noteDN" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Night dinner price">
+            <div class="unit-label">Night Dinner Price</div>
+          </div>
+        </div>
+        <div class="note-sum-box wide" style="margin-top:8px;">
+          <div class="note-sum-label">Total Meals</div>
+          <div class="note-sum-value" id="noteMealsTotal">₹0.00</div>
+        </div>
+
+        <div class="note-sub">📷 Ledger / Bill Photos (up to 6)</div>
+        <div class="photo-btn-row" id="notePhotoLabel">
+          <label class="note-photo-btn">📷 Camera<input id="notePhotoCam" type="file" accept="image/*" capture="environment" class="file-hidden"></label>
+          <label class="note-photo-btn">🖼️ Gallery<input id="notePhotoInput" type="file" accept="image/*" multiple class="file-hidden"></label>
+        </div>
+        <div class="note-photos" id="notePhotos"></div>
+        <div class="photo-count" id="notePhotoCount">0 / 6 photos</div>
+      </div>
+
+      <div class="note-status" id="noteStatus"></div>
+      <button class="btn btn-calc" type="button" onclick="addNote()">➕ Add Note</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> Today's Total</h2>
+      <div class="note-summary">
+        <div class="note-sum-box wide">
+          <div class="note-sum-label">Total Time</div>
+          <div class="note-sum-value" id="sumTime">0 Hours, 0 Minutes, 0 Seconds</div>
+        </div>
+        <div class="note-sum-box">
+          <div class="note-sum-label">Total Earning</div>
+          <div class="note-sum-value" id="sumEarn">₹0.00</div>
+        </div>
+        <div class="note-sum-box">
+          <div class="note-sum-label">Total Expense</div>
+          <div class="note-sum-value" id="sumExp">₹0.00</div>
+        </div>
+        <div class="note-sum-box wide">
+          <div class="note-sum-label">Net (Earning − Expense)</div>
+          <div class="note-sum-value" id="sumNet">₹0.00</div>
+        </div>
+        <div class="note-sum-box wide">
+          <div class="note-sum-label">Total Meals</div>
+          <div class="note-sum-value" id="sumMeals">₹0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> Saved Notes</h2>
+      <div id="noteList"></div>
+    </div>
+  </div>
+
+<div class="photo-viewer" id="photoViewer"><img alt="Photo"></div>
+
+<script>
+  /* ---------- Shared helpers ---------- */
+  function fillOptions(selectEl, from, to, pad){
+    selectEl.innerHTML = '';
+    for(let i=from; i<=to; i++){
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = pad ? String(i).padStart(2,'0') : i;
+      selectEl.appendChild(opt);
+    }
+  }
+
+  function switchTab(n){
+    for(let i = 1; i <= 4; i++){
+      document.getElementById('tabBtn' + i).classList.toggle('active', n === i);
+      document.getElementById('tabPanel' + i).classList.toggle('active', n === i);
+    }
+    if(n === 4) openDailyNote();
+  }
+
+  /* ---------- TAB 1: Time Difference ---------- */
+  const startHour = document.getElementById('startHour');
+  const startMin = document.getElementById('startMin');
+  const startSec = document.getElementById('startSec');
+  const endHour = document.getElementById('endHour');
+  const endMin = document.getElementById('endMin');
+  const endSec = document.getElementById('endSec');
+
+
+  startHour.value = '00'; startMin.value = '00'; startSec.value = '00';
+  endHour.value = '00';   endMin.value = '00';   endSec.value = '00';
+
+
+  function to24Hour(hour12, ampm){
+    let h = (parseInt(hour12, 10) || 0) % 12;
+    if(ampm === 'PM') h += 12;
+    return h;
+  }
+
+  function calculateDifference(){
+    const errorBox = document.getElementById('errorBox1');
+    const resultBox = document.getElementById('result1');
+    errorBox.style.display = 'none';
+
+    const sH = to24Hour(startHour.value, document.getElementById('startAmPm').value);
+    const sM = parseInt(startMin.value, 10) || 0;
+    const sS = parseInt(startSec.value, 10) || 0;
+    const eH = to24Hour(endHour.value, document.getElementById('endAmPm').value);
+    const eM = parseInt(endMin.value, 10) || 0;
+    const eS = parseInt(endSec.value, 10) || 0;
+
+    let startTotal = sH*3600 + sM*60 + sS;
+    let endTotal = eH*3600 + eM*60 + eS;
+
+    if(endTotal <= startTotal){
+      endTotal += 24*3600;
+    }
+
+    const diffSeconds = endTotal - startTotal;
+
+    if(diffSeconds === 0){
+      errorBox.textContent = 'Start and end time are the same. Please choose a valid time range.';
+      errorBox.style.display = 'block';
+      resultBox.style.display = 'none';
+      return;
+    }
+
+    const hours = Math.floor(diffSeconds / 3600);
+    const minutes = Math.floor((diffSeconds % 3600) / 60);
+    const seconds = diffSeconds % 60;
+
+    document.getElementById('durationOutput').textContent =
+      hours + ' Hours, ' + minutes + ' Minutes, ' + seconds + ' Seconds';
+
+    resultBox.style.display = 'block';
+    resultBox.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function resetTab1(){
+    startHour.value = '00'; startMin.value = '00'; startSec.value = '00';
+    document.getElementById('startAmPm').value = 'AM';
+    endHour.value = '00'; endMin.value = '00'; endSec.value = '00';
+    document.getElementById('endAmPm').value = 'AM';
+    document.getElementById('result1').style.display = 'none';
+    document.getElementById('errorBox1').style.display = 'none';
+  }
+
+
+
+
+  /* ---------- TAB 2: Add Total Hours ---------- */
+  let shiftCount = 1;
+
+  function addAnotherShift(){
+    shiftCount++;
+
+    const row = document.createElement('div');
+    row.className = 'shift-row';
+    row.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div class="shift-label">Shift ${shiftCount}</div>
+        <div class="shift-inputs">
+          <div class="field-col">
+            <input class="shift-hours time-field" type="text" min="0" step="1" inputmode="numeric"
+                   placeholder="0" aria-label="Shift ${shiftCount} hours" value="00">
+            <div class="unit-label">Hours</div>
+          </div>
+          <div class="field-col">
+            <input class="shift-minutes time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                   placeholder="0" aria-label="Shift ${shiftCount} minutes" value="00">
+            <div class="unit-label">Minutes</div>
+          </div>
+          <div class="field-col">
+            <input class="shift-seconds time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                   placeholder="0" aria-label="Shift ${shiftCount} seconds" value="00">
+            <div class="unit-label">Seconds</div>
+          </div>
+        </div>
+      </div>
+      <button class="remove-btn" type="button" onclick="removeShift(this)" aria-label="Remove shift">×</button>
+    `;
+
+    document.getElementById('shiftContainer').appendChild(row);
+    attachShiftValidation(row);
+    row.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function removeShift(button){
+    const rows = document.querySelectorAll('#shiftContainer .shift-row');
+    if(rows.length <= 1) return;
+
+    button.closest('.shift-row').remove();
+
+    document.querySelectorAll('#shiftContainer .shift-row').forEach(function(row, index){
+      row.querySelector('.shift-label').textContent = 'Shift ' + (index + 1);
+    });
+
+    shiftCount = document.querySelectorAll('#shiftContainer .shift-row').length;
+    calculateTotalHours(false);
+  }
+
+  function attachShiftValidation(row){ /* handled by shared time-field handlers */ }
+
+  function calculateTotalHours(showError = true){
+    const rows = document.querySelectorAll('#shiftContainer .shift-row');
+    let totalSeconds = 0;
+    let hasTime = false;
+
+    for(const row of rows){
+      const h = Number(row.querySelector('.shift-hours').value || 0);
+      const m = Number(row.querySelector('.shift-minutes').value || 0);
+      const sec = Number(row.querySelector('.shift-seconds').value || 0);
+
+      if(h > 0 || m > 0 || sec > 0) hasTime = true;
+
+      if(!Number.isFinite(h) || !Number.isFinite(m) || !Number.isFinite(sec) ||
+         h < 0 || m < 0 || m > 59 || sec < 0 || sec > 59){
+        if(showError) alert('Please enter valid hours, minutes and seconds.');
+        return;
+      }
+
+      totalSeconds += h * 3600 + m * 60 + sec;
+    }
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    document.getElementById('totalHoursOutput').textContent =
+      hours + ' Hours, ' + minutes + ' Minutes, ' + seconds + ' Seconds';
+
+    document.getElementById('totalHoursBreakdown').textContent =
+      rows.length + ' shift' + (rows.length === 1 ? '' : 's') +
+      ' • Total: ' + (totalSeconds / 3600).toFixed(4) + ' hours';
+
+    if(showError && !hasTime){
+      document.getElementById('totalHoursBreakdown').textContent =
+        'Please enter work time in at least one shift.';
+    }
+
+    document.getElementById('totalHoursResult').style.display = 'block';
+  }
+
+  function resetShifts(){
+    const container = document.getElementById('shiftContainer');
+    container.innerHTML = `
+      <div class="shift-row">
+        <div style="flex:1;min-width:0;">
+          <div class="shift-label">Shift 1</div>
+          <div class="shift-inputs">
+            <div class="field-col">
+              <input class="shift-hours time-field" type="text" min="0" step="1" inputmode="numeric"
+                     placeholder="0" aria-label="Shift 1 hours" value="00">
+              <div class="unit-label">Hours</div>
+            </div>
+            <div class="field-col">
+              <input class="shift-minutes time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                     placeholder="0" aria-label="Shift 1 minutes" value="00">
+              <div class="unit-label">Minutes</div>
+            </div>
+            <div class="field-col">
+              <input class="shift-seconds time-field" type="text" min="0" max="59" step="1" inputmode="numeric"
+                     placeholder="0" aria-label="Shift 1 seconds" value="00">
+              <div class="unit-label">Seconds</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    shiftCount = 1;
+    attachShiftValidation(container.querySelector('.shift-row'));
+
+    document.getElementById('totalHoursOutput').textContent =
+      '0 Hours, 0 Minutes, 0 Seconds';
+    document.getElementById('totalHoursBreakdown').textContent =
+      'Add one or more shifts to calculate the total.';
+  }
+
+  attachShiftValidation(document.querySelector('#shiftContainer .shift-row'));
+
+  /* ---------- TAB 3: Total Cost ---------- */
+  const costHours = document.getElementById('costHours');
+  const costMinutes = document.getElementById('costMinutes');
+  const costSeconds = document.getElementById('costSeconds');
+  const costRate = document.getElementById('costRate');
+
+  function calculateCost3(){
+    const errorBox = document.getElementById('costError3');
+    const resultBox = document.getElementById('costResult3');
+    errorBox.style.display = 'none';
+
+    const h = Number(costHours.value || 0);
+    const m = Number(costMinutes.value || 0);
+    const sec = Number(costSeconds.value || 0);
+    const rate = Number(costRate.value || 0);
+
+    if(!Number.isFinite(h) || !Number.isFinite(m) || !Number.isFinite(sec) ||
+       !Number.isFinite(rate) || h < 0 || m < 0 || m > 59 ||
+       sec < 0 || sec > 59 || rate < 0){
+      errorBox.textContent = 'Please enter valid time and rate values.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const totalSeconds = h * 3600 + m * 60 + sec;
+    if(totalSeconds <= 0){
+      errorBox.textContent = 'Please enter Total Work Time greater than 0.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const totalHoursDecimal = totalSeconds / 3600;
+    const totalCost = totalHoursDecimal * rate;
+
+    document.getElementById('costOutput3').textContent =
+      '₹' + totalCost.toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+    document.getElementById('costBreakdown3').textContent =
+      totalHoursDecimal.toFixed(4) + ' hours × ₹' + rate.toFixed(2) + '/hour';
+
+    resultBox.style.display = 'block';
+  }
+
+  function resetCost3(){
+    costHours.value = '00';
+    costMinutes.value = '00';
+    costSeconds.value = '00';
+    costRate.value = '';
+    document.getElementById('costError3').style.display = 'none';
+    document.getElementById('costResult3').style.display = 'block';
+    document.getElementById('costOutput3').textContent = '₹0.00';
+    document.getElementById('costBreakdown3').textContent = '0.00 hours × ₹0.00/hour';
+  }
+
+  [costHours, costMinutes, costSeconds, costRate].forEach(function(input){
+    input.addEventListener('input', function(){
+      if(costRate.value !== '' &&
+         (Number(costHours.value) > 0 || Number(costMinutes.value) > 0 || Number(costSeconds.value) > 0)){
+        calculateCost3();
+      }
+    });
+  });
+
+
+  /* ---------- TAB 4: Daily Note ---------- */
+  const ENTRIES_KEY = 'dailyNote.entries';
+  const DRAFT_KEY = 'dailyNote.draft';
+
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+  function pad2(n){ return String(n).padStart(2, '0'); }
+  function tnum(v, max){
+    let n = parseInt(v, 10);
+    if(Number.isNaN(n) || n < 0) n = 0;
+    if(max !== undefined && n > max) n = max;
+    return n;
+  }
+  function money(n){
+    return '₹' + Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function noteDateString(d){
+    return d.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+  function noteTimeString(d){
+    return d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
+  }
+  function noteDayKey(d){
+    return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  }
+  function setNoteStatus(msg){
+    document.getElementById('noteStatus').textContent = msg;
+  }
+  function savedStatus(){
+    setNoteStatus('Saved ✓ ' + noteTimeString(new Date()));
+  }
+
+  /* ======================================================================
+     LOCATION  –  native AndroidAPI  (+ browser GPS fallback outside the app)
+
+     Native calls used:
+       AndroidAPI.requestPermission(PERM_ARG)
+       AndroidAPI.getLocation(callbackId)
+       AndroidAPI.getAddress(latitude, longitude, callbackId)
+     Results come back through  window.onAndroidEvent(...)
+     ====================================================================== */
+  const PERM_ARG = 'location';              // <- change if your requestPermission expects another value
+  const CB_LOCATION = 'loc1';               // callback id passed to AndroidAPI.getLocation('loc1')
+  const CB_ADDRESS  = 'addr1';              // callback id passed to AndroidAPI.getAddress(lat, lon, 'addr1')
+
+  let currentLoc = null;   // { lat, lon, city, address, map }
+  try{ currentLoc = JSON.parse(lsGet('dailyNote.loc') || 'null'); }catch(e){ currentLoc = null; }
+  const LOC_FRESH_MS = 3 * 60000;   // a place older than this is never treated as "current"
+  if(currentLoc && (!currentLoc.ts || Date.now() - currentLoc.ts > LOC_FRESH_MS)) currentLoc = null;
+  let currentCity = (currentLoc && currentLoc.city) || '';
+  let locBusy = false;
+
+  /* --- debug log (open "Debug log" at the bottom of Daily Note to see what the app sends) --- */
+  const dbgLines = [];
+  function dbg(msg){
+    const t = new Date();
+    dbgLines.push(pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ':' + pad2(t.getSeconds()) + '  ' + msg);
+    if(dbgLines.length > 60) dbgLines.shift();
+    const el = document.getElementById('noteDebug');
+    if(el){ el.textContent = dbgLines.join('\n'); }
+  }
+  function short(v){ let x; try{ x = typeof v === 'string' ? v : JSON.stringify(v); }catch(e){ x = String(v); } x = String(x); return x.length > 260 ? x.slice(0, 260) + '…' : x; }
+  (function(){
+    const box = document.createElement('details');
+    box.style.cssText = 'margin:12px 4px 24px;font-size:.78rem;color:#326447;';
+    box.innerHTML = '<summary style="font-weight:700;cursor:pointer;">🛠 Debug log</summary>' +
+      '<pre id="noteDebug" style="white-space:pre-wrap;word-break:break-all;max-height:240px;overflow:auto;' +
+      'background:#f4faf5;border:1px solid #cfe5d5;border-radius:8px;padding:8px;margin-top:6px;user-select:text;"></pre>';
+    const host = document.getElementById('tabPanel4');
+    if(host) host.appendChild(box);
+  })();
+
+  /* --- event bridge: window.onAndroidEvent --- */
+  const nativeWait = {};   // callbackId -> resolve/reject
+  function waitNative(id, call, ms){
+    return new Promise(function(resolve, reject){
+      const t = setTimeout(function(){ delete nativeWait[id]; dbg('TIMEOUT waiting for ' + id); reject(new Error('timeout')); }, ms || 15000);
+      nativeWait[id] = { resolve: function(d){ clearTimeout(t); resolve(d); },
+                         reject:  function(er){ clearTimeout(t); reject(er); } };
+      try{ call(); }catch(err){ clearTimeout(t); delete nativeWait[id]; dbg('ERROR calling native: ' + err); reject(err); }
+    });
+  }
+  function maybeJson(v){
+    if(typeof v !== 'string') return v;
+    const s = v.trim();
+    if(s.charAt(0) === '{' || s.charAt(0) === '['){ try{ return JSON.parse(s); }catch(e){} }
+    return v;
+  }
+  let prevAndroidHandler = window.onAndroidEvent;
+  // Accepts (id, data) | (data, id) | ({callbackId|id|event|type, data|result|…}) | JSON strings.
+  window.onAndroidEvent = function(){
+    const args = Array.prototype.slice.call(arguments);
+    dbg('onAndroidEvent ← ' + short(args));
+    let id = null, data;
+    for(let i = 0; i < args.length && !id; i++){
+      const v = maybeJson(args[i]);
+      if(typeof v === 'string' && nativeWait[v]){
+        id = v;
+        data = maybeJson(args.length > i + 1 ? args[i + 1] : args[i - 1]);
+      }else if(v && typeof v === 'object'){
+        const cid = v.callbackId || v.callback || v.id || v.event || v.type || v.name || v.requestId;
+        if(cid && nativeWait[cid]){
+          id = cid;
+          data = ('data' in v) ? v.data : ('result' in v) ? v.result : ('payload' in v) ? v.payload : v;
+          data = maybeJson(data);
+        }
+      }
+    }
+    if(!id){   // no id in the event: recognise the payload by its content
+      for(let i = 0; i < args.length && !id; i++){
+        const v = maybeJson(args[i]);
+        const o = (v && typeof v === 'object') ? (('data' in v) ? maybeJson(v.data) : v) : v;
+        if(nativeWait[CB_LOCATION] && pickLatLon(o)){ id = CB_LOCATION; data = o; }
+        else if(nativeWait[CB_ADDRESS] && o && (typeof o === 'string' || pickAddr(o).address || pickAddr(o).city)){ id = CB_ADDRESS; data = o; }
+      }
+    }
+    if(id && nativeWait[id]){
+      const w = nativeWait[id]; delete nativeWait[id];
+      dbg('matched ' + id + ' → ' + short(data));
+      if(data && typeof data === 'object' && data.error) w.reject(new Error(String(data.error)));
+      else w.resolve(data);
+      return;
+    }
+    if(typeof prevAndroidHandler === 'function'){ try{ prevAndroidHandler.apply(this, arguments); }catch(e){} }
+  };
+  // If the app injects its own window.onAndroidEvent later, keep ours in front and still call theirs.
+  (function(){
+    const ours = window.onAndroidEvent;
+    try{
+      Object.defineProperty(window, 'onAndroidEvent', {
+        configurable: true,
+        get: function(){ return ours; },
+        set: function(fn){ if(typeof fn === 'function' && fn !== ours) prevAndroidHandler = fn; }
+      });
+    }catch(e){}
+  })();
+
+  function firstDef(){ for(let i = 0; i < arguments.length; i++){ if(arguments[i] !== undefined && arguments[i] !== null && arguments[i] !== '') return arguments[i]; } return undefined; }
+  function pickLatLon(d){
+    if(!d) return null;
+    if(typeof d === 'string'){
+      const m = d.match(/(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)/);
+      return m ? { lat: parseFloat(m[1]), lon: parseFloat(m[2]) } : null;
+    }
+    const o = d.location || d.coords || d;
+    const lat = parseFloat(firstDef(o.latitude, o.lat)), lon = parseFloat(firstDef(o.longitude, o.lng, o.lon, o.long));
+    return (Number.isFinite(lat) && Number.isFinite(lon)) ? { lat: lat, lon: lon } : null;
+  }
+  function pickAddr(d){
+    if(!d) return { city: '', address: '' };
+    if(typeof d === 'string'){
+      const parts = d.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      return { city: parts.length >= 5 ? parts[parts.length - 4] : (parts.length >= 3 ? parts[parts.length - 3] : (parts[0] || '')), address: d };
+    }
+    const city = firstDef(d.city, d.locality, d.subLocality, d.subAdminArea, d.district, d.adminArea, d.state) || '';
+    const address = firstDef(d.address, d.fullAddress, d.formattedAddress, d.addressLine, d.display_name) || '';
+    return { city: String(city), address: String(address) };
+  }
+
+  /* --- browser fallback (only when AndroidAPI is missing) --- */
+  function cityFromGeo(j){
+    const a = (j && j.address) || {};
+    return (j && (j.city || j.locality)) || a.city || a.town || a.village || a.suburb || a.county || a.state_district || '';
+  }
+  async function reverseGeocode(lat, lon){
+    try{
+      const r = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=en');
+      const c = cityFromGeo(await r.json());
+      if(c) return c;
+    }catch(e){}
+    return '';
+  }
+  function browserPositionFresh(){
+    return new Promise(function(res, rej){
+      if(!navigator.geolocation) return rej(new Error('nogeo'));
+      navigator.geolocation.getCurrentPosition(function(p){ res({ lat: p.coords.latitude, lon: p.coords.longitude }); },
+        rej, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+    });
+  }
+  function browserPosition(){
+    return new Promise(function(res, rej){
+      if(!navigator.geolocation) return rej(new Error('nogeo'));
+      navigator.geolocation.getCurrentPosition(function(p){ res({ lat: p.coords.latitude, lon: p.coords.longitude }); },
+        rej, { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
+    });
+  }
+
+  /* --- static mini map: OpenStreetMap tiles stitched on a canvas, saved as a small JPEG --- */
+  function tileXY(lat, lon, z){
+    const n = Math.pow(2, z), r = lat * Math.PI / 180;
+    return { x: (lon + 180) / 360 * n, y: (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n };
+  }
+  function loadTile(url){
+    return new Promise(function(res){
+      const im = new Image(); im.crossOrigin = 'anonymous';
+      const t = setTimeout(function(){ im.onload = im.onerror = null; res(null); }, 8000);
+      im.onload = function(){ clearTimeout(t); res(im); };
+      im.onerror = function(){ clearTimeout(t); res(null); };
+      im.src = url;
+    });
+  }
+  // satellite first (same style as the big map in the app), then street maps
+  const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+  function esriTile(layer){ return function(z, x, y){ return ESRI + layer + '/MapServer/tile/' + z + '/' + y + '/' + x; }; }
+  const P_SAT = { name: 'EsriHybrid', z: 17, credit: '© Esri, Maxar',
+    url: esriTile('World_Imagery'), overlay: esriTile('Reference/World_Boundaries_and_Places') };
+  const P_STREET = { name: 'EsriStreet', z: 16, credit: '© Esri, HERE, OSM', url: esriTile('World_Street_Map') };
+  const P_OSM = { name: 'OSM', z: 16, credit: '© OpenStreetMap',
+    url: function(z, x, y){ return 'https://tile.openstreetmap.org/' + z + '/' + x + '/' + y + '.png'; } };
+  const P_CARTO = { name: 'Carto', z: 16, credit: '© OpenStreetMap, © CARTO',
+    url: function(z, x, y){ return 'https://a.basemaps.cartocdn.com/rastertiles/voyager/' + z + '/' + x + '/' + y + '@2x.png'; } };
+  let mapMode = (lsGet('dailyNote.mapmode') === 'street') ? 'street' : 'sat';   // sat = green satellite + names, street = road map
+  function providersFor(mode){
+    return mode === 'street' ? [P_CARTO, P_STREET, P_OSM, P_SAT] : [P_SAT, P_CARTO, P_STREET, P_OSM];
+  }
+  function drawPin(ctx, S){
+    ctx.beginPath(); ctx.arc(S / 2, S / 2, 14, 0, Math.PI * 2);
+    ctx.fillStyle = '#d32f2f'; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#fff'; ctx.stroke();
+  }
+  function drawPlaceLabel(ctx, S, text){
+    if(!text) return;
+    ctx.save();
+    ctx.font = '800 27px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(255,255,255,.95)';
+    ctx.strokeText(text, S / 2, S / 2 - 24, S - 20);
+    ctx.fillStyle = '#14301f'; ctx.fillText(text, S / 2, S / 2 - 24, S - 20);
+    ctx.restore();
+  }
+  async function mapFromProvider(p, lat, lon, S, label, zoomWanted){
+    const pz = Math.max(3, Math.min(zoomWanted || p.z, 18));
+    const T = 256, t = tileXY(lat, lon, pz), tx = Math.floor(t.x), ty = Math.floor(t.y);
+    const px = (t.x - tx) * T, py = (t.y - ty) * T;
+    const c = document.createElement('canvas'); c.width = S; c.height = S;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#e8efe9'; ctx.fillRect(0, 0, S, S);
+    let ok = 0; const jobs = [];
+    for(let dx = -1; dx <= 1; dx++){
+      for(let dy = -1; dy <= 1; dy++){
+        (function(dx, dy){
+          const ox = S / 2 - px + dx * T, oy = S / 2 - py + dy * T;
+          jobs.push(Promise.all([
+            loadTile(p.url(pz, tx + dx, ty + dy)),
+            p.overlay ? loadTile(p.overlay(pz, tx + dx, ty + dy)) : Promise.resolve(null)
+          ]).then(function(r){
+            if(r[0]){
+              if(p.overlay && ('filter' in ctx)) ctx.filter = 'saturate(1.55) contrast(1.2) brightness(1.06)';   // richer colours
+              ctx.drawImage(r[0], ox, oy, T, T); ok++;
+              if('filter' in ctx) ctx.filter = 'none';
+            }
+            if(r[0] && r[1]) ctx.drawImage(r[1], ox, oy, T, T);   // place names on top
+          }));
+        })(dx, dy);
+      }
+    }
+    await Promise.all(jobs);
+    dbg('map ' + p.name + ': ' + ok + ' / 9 tiles');
+    if(ok < 4) return '';
+    drawPin(ctx, S);
+    drawPlaceLabel(ctx, S, label);
+    const vb = Math.round(S * 0.875);   // bottom edge of the visible 4:3 frame
+    ctx.font = '700 14px sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(S - 210, vb - 20, 210, 20);
+    ctx.fillStyle = '#fff'; ctx.fillText(p.credit, S - 5, vb - 3);
+    try{ return c.toDataURL('image/jpeg', 0.86); }
+    catch(e){ dbg('map ' + p.name + ' canvas blocked: ' + e); return ''; }
+  }
+  // used only if no tile server could be reached: grid + pin + coordinates (real coordinates, nothing invented)
+  function placeholderMap(lat, lon, S){
+    const c = document.createElement('canvas'); c.width = S; c.height = S;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#e3efe6'; ctx.fillRect(0, 0, S, S);
+    ctx.strokeStyle = '#c3d9c9'; ctx.lineWidth = 1;
+    for(let i = 0; i <= S; i += 30){ ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, S); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(S, i); ctx.stroke(); }
+    drawPin(ctx, S);
+    ctx.font = '700 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = '#14542d';
+    ctx.fillText(lat.toFixed(5) + ', ' + lon.toFixed(5), S / 2, S - 8);
+    return c.toDataURL('image/jpeg', 0.85);
+  }
+  let mapDz = 0;   // user zoom offset for the mini map (+ in, - out)
+  async function buildMiniMap(lat, lon, label){
+    const S = 480, list = providersFor(mapMode);
+    const zw = Math.round(LM.getZoom());   // the saved picture uses the zoom you are looking at
+    for(let i = 0; i < list.length; i++){
+      try{ const m = await mapFromProvider(list[i], lat, lon, S, label, zw); if(m) return m; }catch(e){ dbg('map error: ' + e); }
+    }
+    dbg('no map tiles reachable – using coordinate card');
+    try{ return placeholderMap(lat, lon, S); }catch(e){ return ''; }
+  }
+
+  /* --- Plus Code (Open Location Code) – the same code Google Maps shows when you share a place ---
+         Paste this code in the Google Maps search box and it opens the exact spot (about 3 m accuracy). */
+  const PC_ALPH = '23456789CFGHJMPQRVWX';
+  function plusCode(lat, lon){
+    lat = Number(lat); lon = Number(lon);
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return '';
+    lat = Math.max(-90, Math.min(90 - 1e-9, lat));
+    lon = ((lon + 180) % 360 + 360) % 360 - 180;
+    const latV = Math.floor((lat + 90) * 40000 + 1e-6), lonV = Math.floor((lon + 180) * 32000 + 1e-6);
+    let latP = Math.floor(latV / 5), lonP = Math.floor(lonV / 4);
+    const grid = PC_ALPH.charAt((latV % 5) * 4 + (lonV % 4));
+    let la = '', lo = '';
+    for(let i = 0; i < 5; i++){
+      la = PC_ALPH.charAt(latP % 20) + la; latP = Math.floor(latP / 20);
+      lo = PC_ALPH.charAt(lonP % 20) + lo; lonP = Math.floor(lonP / 20);
+    }
+    let code = '';
+    for(let i = 0; i < 5; i++) code += la.charAt(i) + lo.charAt(i);
+    return code.slice(0, 8) + '+' + code.slice(8) + grid;
+  }
+  function copyText(txt){
+    function fallback(){
+      try{
+        const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta);
+        ta.select(); ta.setSelectionRange(0, 99999);
+        const ok = document.execCommand('copy'); document.body.removeChild(ta); return ok;
+      }catch(e){ return false; }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(txt).then(function(){ return true; }, function(){ return fallback(); });
+    }
+    return Promise.resolve(fallback());
+  }
+  function copyPlus(code){
+    if(!code){ toast('No location code yet'); return; }
+    copyText(code).then(function(ok){ toast(ok ? 'Code copied: ' + code : 'Code: ' + code); });
+  }
+
+  /* ======================================================================
+     LIVE INTERACTIVE MAP  (drag, pinch-zoom, double-tap, +/-, follow me)
+     ====================================================================== */
+  const LM = (function(){
+    const wrap = document.getElementById('liveMap'), cv = document.getElementById('liveMapCv');
+    const ctx = cv.getContext('2d');
+    let W = 0, H = 0, dpr = 1, c = null, me = null, dm = null, follow = true, raf = 0, anim = null, animRaf = 0, trail = [];
+    const SAT_MAX = 18, ST_MAX = 19;
+    function maxZ(){ return mapMode === 'sat' ? SAT_MAX : ST_MAX; }
+    let z = Math.round(Number(lsGet('dailyNote.mapz')) || 17);
+    z = Math.max(3, Math.min(SAT_MAX, z));
+    const LAYERS = {
+      sat: [ { u: esriTile('World_Imagery'), sharp: true },
+             { u: esriTile('Reference/World_Transportation'), sharp: false },        // roads, lanes
+             { u: esriTile('Reference/World_Boundaries_and_Places'), sharp: false } ],   // village / town names
+      street: [ { u: function(zz, x, y){ return 'https://' + 'abc'.charAt((x + y) % 3) + '.basemaps.cartocdn.com/rastertiles/voyager/' + zz + '/' + x + '/' + y + '@2x.png'; }, sharp: false } ]
+    };
+    const CREDIT = { sat: '© Esri, Maxar', street: '© OpenStreetMap, © CARTO' };
+
+    const cache = new Map();
+    function peek(url){ return cache.get(url); }
+    function tile(url){
+      let t = cache.get(url);
+      if(t){ cache.delete(url); cache.set(url, t); return t; }
+      t = { img: new Image(), ok: false };
+      t.img.onload = function(){ t.ok = true; schedule(); };
+      t.img.onerror = function(){ t.bad = true; };
+      t.img.src = url;
+      cache.set(url, t);
+      if(cache.size > 700){ cache.delete(cache.keys().next().value); }
+      return t;
+    }
+    function schedule(){ if(!raf) raf = requestAnimationFrame(draw); }
+
+    function lonX(lon, zz){ return (lon + 180) / 360 * 256 * Math.pow(2, zz); }
+    function latY(lat, zz){ const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * 256 * Math.pow(2, zz); }
+    function xLon(x, zz){ return x / (256 * Math.pow(2, zz)) * 360 - 180; }
+    function yLat(y, zz){ const n = Math.PI - 2 * Math.PI * y / (256 * Math.pow(2, zz)); return 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))); }
+
+    function drawLayer(L, tz){
+      const lz = (L.sharp && dpr >= 1.25 && tz < maxZ()) ? tz + 1 : tz;   // sharper imagery on high-density screens
+      const k = Math.pow(2, z - lz), size = 256 * k, n = Math.pow(2, lz);
+      const cwx = lonX(c.lon, lz), cwy = latY(c.lat, lz);
+      const x0 = Math.floor((cwx - W / 2 / k) / 256), x1 = Math.floor((cwx + W / 2 / k) / 256);
+      const y0 = Math.max(0, Math.floor((cwy - H / 2 / k) / 256)), y1 = Math.min(n - 1, Math.floor((cwy + H / 2 / k) / 256));
+      if((x1 - x0 + 1) * (y1 - y0 + 1) > 90) return;
+      for(let ty = y0; ty <= y1; ty++){
+        for(let tx = x0; tx <= x1; tx++){
+          const wx = ((tx % n) + n) % n;
+          const px = W / 2 + (tx * 256 - cwx) * k, py = H / 2 + (ty * 256 - cwy) * k;
+          const t = tile(L.u(lz, wx, ty));
+          if(t.ok){ ctx.drawImage(t.img, px, py, size + 0.6, size + 0.6); }
+          else if(lz > 1){   // while loading, show the blurry parent tile instead of a hole
+            const pt = peek(L.u(lz - 1, wx >> 1, ty >> 1));
+            if(pt && pt.ok){
+              const nw = pt.img.naturalWidth || 256;
+              ctx.drawImage(pt.img, (wx & 1) * nw / 2, (ty & 1) * nw / 2, nw / 2, nw / 2, px, py, size + 0.6, size + 0.6);
+            }
+          }
+        }
+      }
+    }
+    function draw(){
+      raf = 0;
+      if(!W || !H) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      ctx.fillStyle = '#dfe9e1'; ctx.fillRect(0, 0, W, H);
+      if(!c) return;
+      const tz = Math.round(z);
+      LAYERS[mapMode].forEach(function(L){ drawLayer(L, tz); });
+      if(me && dm){
+        const sx = W / 2 + lonX(dm.lon, z) - lonX(c.lon, z), sy = H / 2 + latY(dm.lat, z) - latY(c.lat, z);
+        if(me.acc > 0){
+          const r = me.acc / (156543.03392 * Math.cos(me.lat * Math.PI / 180) / Math.pow(2, z));
+          if(r > 12){ ctx.beginPath(); ctx.arc(sx, sy, Math.min(r, 400), 0, Math.PI * 2); ctx.fillStyle = 'rgba(26,115,232,.14)'; ctx.fill(); }
+        }
+        ctx.beginPath(); ctx.arc(sx, sy, 17, 0, Math.PI * 2); ctx.fillStyle = 'rgba(26,115,232,.25)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.fillStyle = '#1a73e8'; ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
+      }
+      ctx.font = '700 10px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      const cr = CREDIT[mapMode];
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(W - ctx.measureText(cr).width - 10, H - 15, ctx.measureText(cr).width + 10, 15);
+      ctx.fillStyle = '#fff'; ctx.fillText(cr, W - 5, H - 3);
+    }
+    function resize(){
+      const w = wrap.clientWidth, h = wrap.clientHeight, d = Math.min(window.devicePixelRatio || 1, 3);
+      if(!w || !h || (w === W && h === H && d === dpr)) return;
+      W = w; H = h; dpr = d;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      schedule();
+    }
+    function setBtn(){ const b = document.getElementById('mapLocate'); if(b) b.classList.toggle('on', follow); }
+    function panBy(dx, dy){
+      if(!c) return;
+      const wx = lonX(c.lon, z) - dx, wy = latY(c.lat, z) - dy;
+      c = { lat: Math.max(-84, Math.min(84, yLat(wy, z))), lon: xLon(wx, z) };
+      schedule();
+    }
+    function zoomAt(nz, sx, sy){
+      if(!c) return;
+      nz = Math.max(3, Math.min(maxZ(), nz));
+      const gx = lonX(c.lon, z) + (sx - W / 2), gy = latY(c.lat, z) + (sy - H / 2);   // world point under the finger
+      const glon = xLon(gx, z), glat = yLat(gy, z);
+      z = nz;
+      const cx = lonX(glon, z) - (sx - W / 2), cy = latY(glat, z) - (sy - H / 2);
+      c = { lat: Math.max(-84, Math.min(84, yLat(cy, z))), lon: xLon(cx, z) };
+      schedule();
+    }
+    function keepFollow(){ if(follow && dm){ c = { lat: dm.lat, lon: dm.lon }; } }
+    function step(now){
+      animRaf = 0;
+      if(!anim || !me) return;
+      let t = (now - anim.t0) / 900; if(t > 1) t = 1;
+      const e = 1 - Math.pow(1 - t, 3);
+      dm = { lat: anim.fl + (me.lat - anim.fl) * e, lon: anim.fo + (me.lon - anim.fo) * e };
+      keepFollow(); draw();
+      if(t < 1) animRaf = requestAnimationFrame(step); else anim = null;
+    }
+    function startAnim(){
+      anim = { fl: dm.lat, fo: dm.lon, t0: performance.now() };
+      if(!animRaf) animRaf = requestAnimationFrame(step);
+    }
+
+    /* touch / mouse gestures */
+    const ptrs = new Map(); let g = null, lastTap = 0, tapStart = null, movedTotal = 0, pinched = false;
+    function local(e){ const r = wrap.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    wrap.addEventListener('pointerdown', function(e){
+      try{ wrap.setPointerCapture(e.pointerId); }catch(er){}
+      const l = local(e); ptrs.set(e.pointerId, l);
+      if(ptrs.size === 1){ movedTotal = 0; pinched = false; tapStart = { t: Date.now(), x: l.x, y: l.y }; }
+      if(ptrs.size === 2){ pinched = true; g = null; }
+      e.preventDefault();
+    });
+    wrap.addEventListener('pointermove', function(e){
+      if(!ptrs.has(e.pointerId)) return;
+      const l = local(e), prev = ptrs.get(e.pointerId);
+      ptrs.set(e.pointerId, l);
+      if(ptrs.size === 1){
+        const dx = l.x - prev.x, dy = l.y - prev.y;
+        movedTotal += Math.abs(dx) + Math.abs(dy);
+        if(movedTotal > 4){ if(follow){ follow = false; setBtn(); } panBy(dx, dy); }
+      }else if(ptrs.size === 2){
+        const a = Array.from(ptrs.values());
+        const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2;
+        if(g && g.d > 0){
+          if(follow){ follow = false; setBtn(); }
+          panBy(mx - g.mx, my - g.my);
+          zoomAt(z + Math.log(d / g.d) / Math.LN2, mx, my);
+        }
+        g = { d: d, mx: mx, my: my };
+      }
+      e.preventDefault();
+    });
+    function endPtr(e){
+      if(!ptrs.has(e.pointerId)) return;
+      const l = ptrs.get(e.pointerId); ptrs.delete(e.pointerId);
+      if(ptrs.size === 0){
+        if(pinched){ zoomAt(Math.round(z), g ? g.mx : l.x, g ? g.my : l.y); lsSet('dailyNote.mapz', String(z)); }
+        else if(tapStart && e.type === 'pointerup' && movedTotal < 8 && Date.now() - tapStart.t < 350){
+          const now = Date.now();
+          if(now - lastTap < 350){ zoomAt(Math.round(z) + 1, l.x, l.y); lsSet('dailyNote.mapz', String(z)); lastTap = 0; }
+          else lastTap = now;
+        }
+        g = null; tapStart = null;
+      }else{ g = null; }
+    }
+    wrap.addEventListener('pointerup', endPtr);
+    wrap.addEventListener('pointercancel', endPtr);
+    wrap.addEventListener('wheel', function(e){
+      e.preventDefault(); const l = local(e);
+      zoomAt(Math.round(z) + (e.deltaY < 0 ? 1 : -1), l.x, l.y); lsSet('dailyNote.mapz', String(z));
+    }, { passive: false });
+    wrap.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+    if(typeof ResizeObserver !== 'undefined'){ new ResizeObserver(resize).observe(wrap); }
+    window.addEventListener('resize', resize);
+
+    return {
+      setLoc: function(lat, lon, acc){
+        const first = !me, prev = me;
+        me = { lat: lat, lon: lon, acc: acc || 0 };
+        if(first || !dm){ dm = { lat: lat, lon: lon }; if(!c) c = { lat: lat, lon: lon }; keepFollow(); }
+        else if(prev && (Math.abs(prev.lat - lat) > 1e-7 || Math.abs(prev.lon - lon) > 1e-7)){
+          if(distMeters(dm.lat, dm.lon, lat, lon) > 3000){ dm = { lat: lat, lon: lon }; keepFollow(); } else startAnim();   // glide the blue dot to the new position
+        }
+        resize(); schedule();
+      },
+      setMode: function(){
+        wrap.classList.toggle('sat', mapMode === 'sat'); wrap.classList.toggle('street', mapMode !== 'sat');
+        if(z > maxZ()) z = maxZ();
+        schedule();
+      },
+      zoomBy: function(step){ zoomAt(Math.round(z) + step, W / 2, H / 2); lsSet('dailyNote.mapz', String(z)); },
+      recenter: function(){ follow = true; setBtn(); keepFollow(); schedule(); },
+      getZoom: function(){ return z; },
+      resize: resize
+    };
+  })();
+  LM.setMode();
+
+  function setLocationUI(){
+    const box = document.querySelector('.note-datetime');
+    if(currentLoc && Number.isFinite(currentLoc.lat)){
+      box.classList.add('has-map');
+      LM.setLoc(currentLoc.lat, currentLoc.lon, (bpos && Date.now() - bpos.ts < 20000) ? bpos.acc : 0);
+    }else{ box.classList.remove('has-map'); }
+    document.getElementById('noteAddr').textContent = (currentLoc && currentLoc.address) ? currentLoc.address : '';
+    const pr = document.getElementById('notePlus');
+    if(currentLoc && Number.isFinite(currentLoc.lat)){
+      currentLoc.plus = plusCode(currentLoc.lat, currentLoc.lon);
+      document.getElementById('plusCode').textContent = currentLoc.plus;
+      const fresh = Date.now() - (currentLoc.ts || 0) < 20000;
+      const dot = document.getElementById('liveDot');
+      dot.textContent = fresh ? '🟢 LIVE' : '⚪ updating…';
+      dot.classList.toggle('off', !fresh);
+      pr.classList.add('on');
+    }else{ pr.classList.remove('on'); }
+    updateNoteClock();
+  }
+
+  const BIZ_DEFAULT = 'My Home MV62';
+  function getBiz(){
+    const v = lsGet('dailyNote.biz');
+    if(v === null || v === undefined || /MB62|PAIK|बाई होम/i.test(String(v))){ lsSet('dailyNote.biz', BIZ_DEFAULT); return BIZ_DEFAULT; }
+    return String(v).trim();
+  }
+  (function(){
+    const inp = document.getElementById('bizName');
+    inp.value = getBiz();
+    inp.addEventListener('input', function(){ lsSet('dailyNote.biz', inp.value.trim()); updateNoteClock(); });
+  })();
+
+  function syncModeBtn(){ document.getElementById('mapMode').textContent = (mapMode === 'sat') ? '🗺️' : '🛰️'; }
+  syncModeBtn();
+  document.getElementById('mapMode').addEventListener('click', function(ev){
+    ev.preventDefault();
+    mapMode = (mapMode === 'sat') ? 'street' : 'sat';
+    lsSet('dailyNote.mapmode', mapMode);
+    LM.setMode(); syncModeBtn();
+  });
+  document.getElementById('mapZoomIn').addEventListener('click', function(ev){ ev.preventDefault(); LM.zoomBy(1); });
+  document.getElementById('mapZoomOut').addEventListener('click', function(ev){ ev.preventDefault(); LM.zoomBy(-1); });
+  document.getElementById('mapLocate').addEventListener('click', function(ev){ ev.preventDefault(); LM.recenter(); });
+
+  /* exact village / hamlet name for the spot (not the block / tehsil / district) */
+  async function fetchJson(url, ms){
+    const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const t = setTimeout(function(){ if(ctl) ctl.abort(); }, ms || 8000);
+    try{
+      const r = await fetch(url, ctl ? { signal: ctl.signal, headers: { 'Accept': 'application/json' } } : { headers: { 'Accept': 'application/json' } });
+      return await r.json();
+    }finally{ clearTimeout(t); }
+  }
+  // returns { village, address } – the village / hamlet you are actually standing in.
+  // 1) OpenStreetMap place boundaries that CONTAIN your point, 2) otherwise the NEAREST village / hamlet centre (Overpass),
+  // 3) otherwise Nominatim. The district / state part of the address comes from Nominatim.
+  function placeName(t){ return String((t && (t['name:en'] || t.int_name || t.name)) || ''); }
+  async function overpassPlace(lat, lon){
+    const q = '[out:json][timeout:12];' +
+      '(is_in(' + lat + ',' + lon + ');)->.a;' +
+      'area.a[place~"^(village|hamlet|town)$"][name];out tags;' +
+      'node(around:3500,' + lat + ',' + lon + ')[place~"^(village|hamlet|town|suburb|locality|isolated_dwelling)$"][name];out body 80;';
+    const hosts = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+    for(let i = 0; i < hosts.length; i++){
+      try{
+        const j = await fetchJson(hosts[i] + '?data=' + encodeURIComponent(q), 13000);
+        const els = (j && j.elements) || [];
+        const areas = els.filter(function(e){ return e.type === 'area'; });
+        const nodes = els.filter(function(e){ return e.type === 'node'; }).map(function(e){
+          return { name: placeName(e.tags), place: (e.tags || {}).place, lat: e.lat, lon: e.lon, d: distMeters(lat, lon, e.lat, e.lon) };
+        }).filter(function(e){ return e.name; }).sort(function(x, y){ return x.d - y.d; });
+        dbg('nearest places: ' + nodes.slice(0, 4).map(function(n){ return n.name + ' (' + n.place + ') ' + Math.round(n.d) + 'm'; }).join(' | ') +
+            ' || inside: ' + areas.map(function(e){ return placeName(e.tags); }).join(', '));
+        // 1) standing INSIDE a village / hamlet boundary → that village
+        const inside = areas.map(function(e){ return { name: placeName(e.tags), place: (e.tags || {}).place }; }).filter(function(e){ return e.name; });
+        if(inside.length){
+          const pick = inside.find(function(e){ return e.place === 'hamlet'; }) || inside.find(function(e){ return e.place === 'village'; }) || inside[0];
+          return { name: pick.name, nearby: nodes.slice(0, 14) };
+        }
+        // 2) outside → the NEAREST village / hamlet (real settlements only, not field names)
+        const real = nodes.filter(function(n){ return n.place === 'village' || n.place === 'hamlet' || n.place === 'town'; });
+        if(real.length) return { name: real[0].name, nearby: nodes.slice(0, 14) };
+        if(nodes.length) return { name: nodes[0].name, nearby: nodes.slice(0, 14) };
+        return { name: '', nearby: [] };
+      }catch(e){ dbg('overpass ' + (i + 1) + ' failed: ' + e); }
+    }
+    return { name: '', nearby: [] };
+  }
+  async function villageInfo(lat, lon){
+    const nomP = (async function(){
+      const zooms = [18, 16];
+      for(let i = 0; i < zooms.length; i++){
+        try{
+          const j = await fetchJson('https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&accept-language=en&zoom=' + zooms[i] + '&lat=' + lat + '&lon=' + lon);
+          const a = (j && j.address) || {};
+          const v = a.village || a.hamlet || a.isolated_dwelling || a.locality || a.farm || a.town || '';
+          if(v || a.state_district || a.state) return { v: String(v), dist: a.state_district || '', state: a.state || '', pin: a.postcode || '' };
+        }catch(e){ dbg('nominatim failed: ' + e); }
+      }
+      return null;
+    })();
+    const [ov, nom] = await Promise.all([ overpassPlace(lat, lon).catch(function(){ return { name: '', nearby: [] }; }), nomP ]);
+    const ovName = ov.name;
+    const village = ovName || (nom && nom.v) || '';
+    if(!village) return null;
+    dbg('village: ' + village + (ovName ? ' (OSM nearest/inside)' : ' (Nominatim)') + (nom && nom.v && nom.v !== village ? ' | Nominatim said: ' + nom.v : ''));
+    const parts = [village, nom && nom.dist, nom && nom.state, nom && nom.pin].filter(Boolean);
+    return { village: village, address: parts.join(', '), nearby: ov.nearby || [] };
+  }
+
+  /* --- continuous browser GPS (watchPosition): always a fresh fix, never a cached one --- */
+  let bpos = null, bwatchId = null;
+  function startBrowserWatch(){
+    if(!navigator.geolocation) return;
+    if(bwatchId !== null){ try{ navigator.geolocation.clearWatch(bwatchId); }catch(e){} bwatchId = null; }
+    try{
+      bwatchId = navigator.geolocation.watchPosition(function(p){
+        const t = (p.timestamp && Math.abs(Date.now() - p.timestamp) < 60000) ? p.timestamp : Date.now();
+        bpos = { lat: p.coords.latitude, lon: p.coords.longitude, ts: t, acc: p.coords.accuracy };
+        liveSoon();
+      }, function(er){ dbg('browser GPS watch: ' + (er && er.message ? er.message : er)); },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+    }catch(e){ dbg('watch error: ' + e); }
+  }
+  let liveTimer = null;
+  function liveSoon(){   // a new GPS point arrived: update quickly (max once every 2.5 s)
+    if(liveTimer || document.hidden) return;
+    liveTimer = setTimeout(function(){ liveTimer = null; refreshLocation(true, true); }, 1200);
+  }
+  // keep the old village / address when the phone has moved less than 120 m (saves network, keeps live update fast)
+  function reuseGeo(lat, lon){
+    const c = currentLoc;
+    if(c && c.city && c.gts && Date.now() - c.gts < 3 * 60000 && distMeters(c.lat, c.lon, lat, lon) < 70){
+      return { lat: lat, lon: lon, city: c.city, address: c.address, gts: c.gts, nearby: c.nearby || [] };
+    }
+    return null;
+  }
+  // a village you chose by hand stays in force while you are within 500 m of where you chose it
+  let manualVillage = null;
+  try{ manualVillage = JSON.parse(lsGet('dailyNote.manualVillage') || 'null'); }catch(e){}
+  function manualFor(lat, lon){
+    return (manualVillage && distMeters(manualVillage.lat, manualVillage.lon, lat, lon) < 500) ? manualVillage : null;
+  }
+
+  async function fetchLocationOnce(){
+    let lat, lon, city = '', address = '';
+    let usedBrowser = false, nearby = [];
+    if(bpos && Date.now() - bpos.ts < 20000){   // fresh browser GPS fix available → use it
+      lat = bpos.lat; lon = bpos.lon; usedBrowser = true;
+      const rg = reuseGeo(lat, lon); if(rg) return rg;
+    }else if(window.AndroidAPI && window.AndroidAPI.getLocation){
+      const d = await waitNative(CB_LOCATION, function(){ dbg('→ AndroidAPI.getLocation("' + CB_LOCATION + '")'); window.AndroidAPI.getLocation(CB_LOCATION); }, 20000);
+      const p = pickLatLon(d);
+      if(!p){ dbg('could not read latitude/longitude from: ' + short(d)); throw new Error('nolatlon'); }
+      lat = p.lat; lon = p.lon;
+      try{   // some phones hand back a cached "last known" fix – if it carries an old timestamp, ask for a fresh one
+        let fts = (d && typeof d === 'object') ? Number(firstDef(d.time, d.timestamp, d.ts, (d.location || {}).time, (d.location || {}).timestamp)) : NaN;
+        if(Number.isFinite(fts) && fts > 0){
+          if(fts < 1e11) fts *= 1000;
+          if(Date.now() - fts > 120000){
+            dbg('native fix is ' + Math.round((Date.now() - fts) / 1000) + 's old – asking browser GPS');
+            const bp = await browserPositionFresh();
+            lat = bp.lat; lon = bp.lon;
+          }
+        }
+      }catch(e){ dbg('fresh GPS not available: ' + e); }
+      const rg2 = reuseGeo(lat, lon); if(rg2) return rg2;
+      const a0 = pickAddr(typeof d === 'object' ? d : null);   // some builds already include the address
+      city = a0.city; address = a0.address;
+      if((!city || !address) && window.AndroidAPI.getAddress){
+        try{
+          const ad = await waitNative(CB_ADDRESS, function(){ dbg('→ AndroidAPI.getAddress(' + lat + ', ' + lon + ', "' + CB_ADDRESS + '")'); window.AndroidAPI.getAddress(lat, lon, CB_ADDRESS); }, 15000);
+          const a = pickAddr(ad);
+          city = a.city || city; address = a.address || address;
+        }catch(e){}
+      }
+    }else{
+      const p = await browserPosition();
+      lat = p.lat; lon = p.lon;
+      const rg3 = reuseGeo(lat, lon); if(rg3) return rg3;
+      city = await reverseGeocode(lat, lon);
+    }
+    if(usedBrowser && !city && window.AndroidAPI && window.AndroidAPI.getAddress){
+      try{
+        const ad = await waitNative(CB_ADDRESS, function(){ window.AndroidAPI.getAddress(lat, lon, CB_ADDRESS); }, 8000);
+        const a = pickAddr(ad); city = a.city || city; address = a.address || address;
+      }catch(e){}
+    }
+    try{
+      const vi = await villageInfo(lat, lon);
+      if(vi){ city = vi.village; address = vi.address; nearby = vi.nearby || []; }
+    }catch(e){ dbg('village error: ' + e); }
+    const mv = manualFor(lat, lon);
+    if(mv){ city = mv.name; address = [mv.name].concat(String(address || '').split(',').slice(1).map(function(x){ return x.trim(); })).filter(Boolean).join(', '); }
+    return { lat: lat, lon: lon, city: city, address: address, gts: Date.now(), nearby: nearby };
+  }
+
+  function distMeters(la1, lo1, la2, lo2){
+    const R = 6371000, r = Math.PI / 180, dLa = (la2 - la1) * r, dLo = (lo2 - lo1) * r;
+    const a = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(la1 * r) * Math.cos(la2 * r) * Math.sin(dLo / 2) * Math.sin(dLo / 2);
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  let permAsked = false;   // ask for the permission once per app start (not on every background refresh)
+  let locPromise = null;
+  let lastLocError = '';
+  // fast=true: no retry delay (used when saving a note). Returns the new location or null.
+  function refreshLocation(fast, live){
+    if(locPromise) return locPromise;          // a fetch is already running – reuse it
+    locPromise = (async function(){
+      try{
+        if(window.AndroidAPI && window.AndroidAPI.requestPermission && (!permAsked || (lastLocError && !live))){
+          permAsked = true;
+          try{ dbg('→ AndroidAPI.requestPermission("' + PERM_ARG + '")'); window.AndroidAPI.requestPermission(PERM_ARG); }catch(e){ dbg('requestPermission error: ' + e); }
+        }
+        let loc = null;
+        try{ loc = await fetchLocationOnce(); }
+        catch(e){
+          if(fast) throw e;
+          await new Promise(function(r){ setTimeout(r, 4000); });   // permission dialog may still be open
+          loc = await fetchLocationOnce();
+        }
+        const movedM = currentLoc ? distMeters(currentLoc.lat, currentLoc.lon, loc.lat, loc.lon) : 1e9;
+        loc.map = '';   // the live map draws itself; the saved picture is made when you press Add Note
+        if(!live || movedM >= 6) dbg('location ok: ' + loc.lat + ', ' + loc.lon + ' | ' + (loc.city || '(no city)') + ' | live map');
+        loc.ts = Date.now(); loc.mode = mapMode; loc.plus = plusCode(loc.lat, loc.lon);
+        lastLocError = '';
+        currentLoc = loc;
+        currentCity = loc.city || currentCity;
+        lsSet('dailyNote.city', currentCity);
+        lsSet('dailyNote.loc', JSON.stringify(loc));
+        setLocationUI();
+        return loc;
+      }catch(e){
+        lastLocError = (e && e.message) ? e.message : String(e);
+        dbg('location failed: ' + lastLocError);
+        if(currentLoc && (!currentLoc.ts || Date.now() - currentLoc.ts > LOC_FRESH_MS)){
+          currentLoc = null; currentCity = ''; lsSet('dailyNote.loc', ''); setLocationUI();
+        }
+        return null;                            // no permission / no GPS
+      }finally{ locPromise = null; }
+    })();
+    return locPromise;
+  }
+
+  /* live date & time (hours, minutes, seconds) */
+  function updateNoteClock(){
+    const now = new Date();
+    document.getElementById('noteDate').textContent =
+      noteDateString(now) + (currentCity ? '  •  📍 ' + currentCity : '');
+    document.getElementById('noteTime').textContent = noteTimeString(now);
+    const biz = getBiz();
+    document.getElementById('noteBiz').textContent = biz ? '🏢 ' + biz : '';
+  }
+  updateNoteClock();
+  setInterval(updateNoteClock, 1000);
+
+  /* ----- helpers for the new fields ----- */
+  const MAX_PHOTOS = 6;
+  function lsSetOk(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+  function nval(v){ const n = parseFloat(v); return (Number.isFinite(n) && n > 0) ? n : 0; }
+  function mealsOf(b, l, d){ return nval(b) + nval(l) + nval(d); }
+  function cleanPhotos(arr){
+    if(!Array.isArray(arr)) return [];
+    return arr.filter(function(p){ return typeof p === 'string' && p.indexOf('data:image/') === 0; }).slice(0, MAX_PHOTOS);
+  }
+
+  // ask the browser not to clear this app's saved data automatically
+  try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+
+  /* ----- stored entries ----- */
+  let noteEntries = [];
+  try{
+    const parsed = JSON.parse(lsGet(ENTRIES_KEY) || '[]');
+    if(Array.isArray(parsed)) noteEntries = parsed;
+  }catch(e){ noteEntries = []; }
+  noteEntries.forEach(function(e){ e.photos = cleanPhotos(e.photos); });   // older entries have no photos
+
+  // bring over the single note from the previous version, if any
+  const oldNote = lsGet('dailyNote.text');
+  if(oldNote && oldNote.trim() !== ''){
+    noteEntries.push({id: Date.now() + '-old', ts: Date.now(), text: oldNote.trim(),
+                      h:0, m:0, s:0, amount:'', type:'earning', photos:[]});
+    lsSet(ENTRIES_KEY, JSON.stringify(noteEntries));
+  }
+  lsDel('dailyNote.text');
+  lsDel('dailyNote.lastStampDate');
+
+  function saveEntries(){
+    const ok = lsSetOk(ENTRIES_KEY, JSON.stringify(noteEntries));
+    if(ok) savedStatus();
+    else setNoteStatus('⚠️ Storage is full – changes could not be saved.');
+    return ok;
+  }
+  const STORAGE_FULL_MSG = 'Phone storage for this app is full, so this could not be saved.\n\nDelete some old photos or notes and try again.';
+
+  /* ----- photos: resize + convert to Base64 (JPEG) so they fit in localStorage ----- */
+  function drawToJpeg(source, srcW, srcH){
+    const MAXSIDE = 1100;
+    const scale = Math.min(1, MAXSIDE / Math.max(srcW, srcH));
+    const w = Math.max(1, Math.round(srcW * scale));
+    const h = Math.max(1, Math.round(srcH * scale));
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(source, 0, 0, w, h);
+    return c.toDataURL('image/jpeg', 0.6);
+  }
+
+  // Loads via an object URL (light on memory for big camera photos),
+  // falls back to FileReader, then to createImageBitmap.
+  function compressImage(file){
+    function viaImage(src, revoke){
+      return new Promise(function(resolve, reject){
+        const img = new Image();
+        img.onerror = function(){ if(revoke) URL.revokeObjectURL(src); reject(new Error('decode')); };
+        img.onload = function(){
+          try{
+            const out = drawToJpeg(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
+            if(revoke) URL.revokeObjectURL(src);
+            resolve(out);
+          }catch(err){ if(revoke) URL.revokeObjectURL(src); reject(err); }
+        };
+        img.src = src;
+      });
+    }
+    function viaReader(){
+      return new Promise(function(resolve, reject){
+        const reader = new FileReader();
+        reader.onerror = function(){ reject(new Error('read')); };
+        reader.onload = function(){ viaImage(reader.result, false).then(resolve, reject); };
+        reader.readAsDataURL(file);
+      });
+    }
+    function viaBitmap(){
+      if(typeof createImageBitmap !== 'function') return Promise.reject(new Error('nobitmap'));
+      return createImageBitmap(file).then(function(bmp){
+        const out = drawToJpeg(bmp, bmp.width, bmp.height);
+        if(bmp.close) bmp.close();
+        return out;
+      });
+    }
+    let first;
+    try{
+      first = (window.URL && URL.createObjectURL)
+        ? viaImage(URL.createObjectURL(file), true)
+        : Promise.reject(new Error('nourl'));
+    }catch(e){ first = Promise.reject(e); }
+    return first.catch(viaReader).catch(viaBitmap);
+  }
+
+  function looksLikeImage(f){
+    if(f.type && f.type.indexOf('image/') === 0) return true;
+    // some phones report an empty type for camera/gallery files
+    return (!f.type || f.type === 'application/octet-stream') &&
+           /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(f.name || '');
+  }
+
+  async function addPhotosTo(list, fileList){
+    const files = Array.prototype.slice.call(fileList || []).filter(looksLikeImage);
+    const room = Math.max(0, MAX_PHOTOS - list.length);
+    const take = files.slice(0, room);
+    let failed = 0;
+    for(let i = 0; i < take.length; i++){
+      try{ list.push(await compressImage(take[i])); }catch(e){ failed++; }
+    }
+    const all = Array.prototype.slice.call(fileList || []);
+    return { tooMany: files.length > take.length, failed: failed,
+             skipped: all.length - files.length, added: take.length - failed };
+  }
+  function photoMsg(res){
+    if(res.tooMany) return 'Only ' + MAX_PHOTOS + ' photos are allowed per note – the extra photos were skipped.';
+    if(res.skipped) return 'Only image files can be added.';
+    if(res.failed) return 'Some photos could not be read. Please try another photo.';
+    return '';
+  }
+
+  function buildThumbs(container, photos){
+    container.innerHTML = '';
+    photos.forEach(function(src, i){
+      const t = document.createElement('div');
+      t.className = 'note-thumb';
+      const img = document.createElement('img');
+      img.className = 'thumb-img';
+      img.src = src;
+      img.alt = 'Photo ' + (i + 1);
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'thumb-x';
+      x.dataset.i = i;
+      x.setAttribute('aria-label', 'Remove photo');
+      x.textContent = '×';
+      t.appendChild(img);
+      t.appendChild(x);
+      container.appendChild(t);
+    });
+  }
+  function setPhotoUI(container, countEl, labelEl, photos){
+    buildThumbs(container, photos);
+    countEl.textContent = photos.length + ' / ' + MAX_PHOTOS + ' photos';
+    labelEl.style.display = photos.length >= MAX_PHOTOS ? 'none' : '';
+  }
+
+  /* full-screen photo viewer */
+  const photoViewer = document.getElementById('photoViewer');
+  function openPhoto(src){
+    photoViewer.querySelector('img').src = src;
+    photoViewer.classList.add('open');
+  }
+  photoViewer.addEventListener('click', function(){ photoViewer.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') photoViewer.classList.remove('open');
+  });
+
+  /* ----- new-note form (draft is auto-saved too) ----- */
+  const noteInput = document.getElementById('noteInput');
+  const noteH = document.getElementById('noteH');
+  const noteM = document.getElementById('noteM');
+  const noteS = document.getElementById('noteS');
+  const noteAmount = document.getElementById('noteAmount');
+  const noteType = document.getElementById('noteType');
+  const noteDP = document.getElementById('noteDP');
+  const noteDQ = document.getElementById('noteDQ');
+  const noteBF = document.getElementById('noteBF');
+  const noteLN = document.getElementById('noteLN');
+  const noteDN = document.getElementById('noteDN');
+  const notePhotoInput = document.getElementById('notePhotoInput');
+  const notePhotoLabel = document.getElementById('notePhotoLabel');
+  const notePhotosEl = document.getElementById('notePhotos');
+  const notePhotoCount = document.getElementById('notePhotoCount');
+  let pendingPhotos = [];
+
+  function renderPending(){ setPhotoUI(notePhotosEl, notePhotoCount, notePhotoLabel, pendingPhotos); }
+
+  function updateFormTotals(){
+    document.getElementById('noteMealsTotal').textContent = money(mealsOf(noteBF.value, noteLN.value, noteDN.value));
+  }
+
+  function saveDraft(){
+    const ok = lsSetOk(DRAFT_KEY, JSON.stringify({
+      text: noteInput.value,
+      h: tnum(noteH.value), m: tnum(noteM.value, 59), s: tnum(noteS.value, 59),
+      amount: noteAmount.value, type: noteType.value,
+      dp: noteDP.value, dq: noteDQ.value,
+      bf: noteBF.value, ln: noteLN.value, dn: noteDN.value,
+      photos: pendingPhotos
+    }));
+    if(ok) savedStatus();
+    else setNoteStatus('⚠️ Storage is full – this draft is not saved yet.');
+  }
+
+  function loadDraft(){
+    try{
+      const d = JSON.parse(lsGet(DRAFT_KEY) || 'null');
+      if(!d) return;
+      noteInput.value = d.text || '';
+      noteH.value = pad2(tnum(d.h)); noteM.value = pad2(tnum(d.m, 59)); noteS.value = pad2(tnum(d.s, 59));
+      noteAmount.value = d.amount || '';
+      noteType.value = d.type === 'expense' ? 'expense' : 'earning';
+      noteDP.value = d.dp || ''; noteDQ.value = d.dq || '';
+      noteBF.value = d.bf || ''; noteLN.value = d.ln || ''; noteDN.value = d.dn || '';
+      pendingPhotos = cleanPhotos(d.photos);
+    }catch(e){}
+    updateFormTotals();
+    renderPending();
+  }
+
+  function formChanged(){ updateFormTotals(); saveDraft(); }
+  document.getElementById('noteForm').addEventListener('input', formChanged);
+  document.getElementById('noteForm').addEventListener('change', formChanged);
+
+  async function onNewPhotos(ev){
+    const inp = ev.target;
+    setNoteStatus('Processing photos…');
+    const res = await addPhotosTo(pendingPhotos, inp.files);
+    inp.value = '';
+    renderPending();
+    saveDraft();
+    const msg = photoMsg(res);
+    if(msg) setNoteStatus(msg);
+  }
+  notePhotoInput.addEventListener('change', onNewPhotos);
+  document.getElementById('notePhotoCam').addEventListener('change', onNewPhotos);
+
+  notePhotosEl.addEventListener('click', function(ev){
+    const x = ev.target.closest('.thumb-x');
+    if(x){
+      pendingPhotos.splice(Number(x.dataset.i), 1);
+      renderPending();
+      saveDraft();
+      return;
+    }
+    const img = ev.target.closest('.thumb-img');
+    if(img) openPhoto(img.src);
+  });
+
+  let saving = false;
+  async function addNote(){
+    if(saving) return;
+    const text = noteInput.value.trim();
+    const hasOther = [noteAmount, noteDP, noteDQ, noteBF, noteLN, noteDN].some(function(el){ return el.value !== ''; })
+                     || pendingPhotos.length > 0;
+    if(text === '' && !hasOther){
+      setNoteStatus('Please write a note, add an expense or add a photo first.');
+      noteInput.focus();
+      return;
+    }
+    saving = true;
+    let loc = null;
+    try{
+      // live location + mini map are fetched right now, when "Add Note" is pressed
+      setNoteStatus('📍 Getting live location…');
+      const live = await Promise.race([
+        refreshLocation(true),
+        new Promise(function(r){ setTimeout(function(){ r(null); }, 12000); })
+      ]);
+      // if the live fetch failed, only reuse a place fetched in the last 3 minutes
+      loc = live || ((currentLoc && Date.now() - (currentLoc.ts || 0) < LOC_FRESH_MS) ? currentLoc : null);
+      if(loc && !loc.map){ try{ loc.map = await buildMiniMap(loc.lat, loc.lon, loc.city); }catch(e){} }
+    }catch(e){ loc = null; }
+    setNoteStatus('');
+    if(!loc){
+      const why = /timeout/.test(lastLocError) ? 'no reply from the app – check Location permission & GPS' : (lastLocError || 'unknown');
+      setNoteStatus('⚠️ Location unavailable (' + why + ')');
+    }
+    const entry = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      ts: Date.now(),                       // date & time (with seconds) stamped automatically
+      text: text,
+      h: tnum(noteH.value), m: tnum(noteM.value, 59), s: tnum(noteS.value, 59),
+      amount: noteAmount.value,
+      type: noteType.value,
+      dieselPrice: noteDP.value,
+      dieselQty: noteDQ.value,
+      breakfast: noteBF.value,
+      lunch: noteLN.value,
+      dinner: noteDN.value,
+      photos: pendingPhotos.slice(),
+      biz: getBiz(),
+      city: loc ? (loc.city || '') : '',
+      address: loc ? (loc.address || '') : '',
+      lat: loc ? loc.lat : null,
+      lon: loc ? loc.lon : null,
+      mapImg: loc ? (loc.map || '') : '',
+      plus: loc ? plusCode(loc.lat, loc.lon) : '',
+      noLoc: !loc
+    };
+    noteEntries.unshift(entry);
+    if(!saveEntries()){
+      noteEntries.shift();                  // keep the draft so nothing is lost
+      saving = false;
+      alert(STORAGE_FULL_MSG);
+      return;
+    }
+    saving = false;
+
+    noteInput.value = '';
+    noteH.value = '00'; noteM.value = '00'; noteS.value = '00';
+    noteAmount.value = '';
+    noteDP.value = ''; noteDQ.value = '';
+    noteBF.value = ''; noteLN.value = ''; noteDN.value = '';
+    pendingPhotos = [];
+    renderPending();
+    updateFormTotals();
+    lsDel(DRAFT_KEY);
+
+    renderNotes();
+    savedStatus();
+  }
+
+  /* ----- saved notes list ----- */
+  function autosizeText(el){
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function refreshEntryTotals(box, e){
+    box.querySelector('.note-meals-total').textContent = money(mealsOf(e.breakfast, e.lunch, e.dinner));
+  }
+  function refreshEntryPhotos(box, e){
+    setPhotoUI(box.querySelector('.note-photos'), box.querySelector('.photo-count'),
+               box.querySelector('.photo-btn-row'), e.photos);
+  }
+
+  function renderNotes(){
+    const list = document.getElementById('noteList');
+    list.innerHTML = '';
+
+    if(noteEntries.length === 0){
+      list.innerHTML = '<div class="note-empty">No notes yet. Add your first note above.</div>';
+      updateSummary();
+      return;
+    }
+
+    const moneyField = function(cls, label, aria){
+      return '<div class="field-col"><input class="' + cls + '" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="' + aria + '"><div class="unit-label">' + label + '</div></div>';
+    };
+
+    noteEntries.slice().sort(function(a, b){ return b.ts - a.ts; }).forEach(function(e){
+      const d = new Date(e.ts);
+      const box = document.createElement('div');
+      box.className = 'note-entry';
+      box.dataset.id = e.id;
+      box.innerHTML =
+        '<div class="note-entry-head">' +
+          '<div class="note-stamp"></div>' +
+          '<div class="note-actions">' +
+            '<button class="note-share" type="button">📤 Share</button>' +
+            '<button class="note-del" type="button">🗑️ Delete</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="note-loc-row"><div class="note-loc-text"></div><img class="note-minimap" alt="Map"></div>' +
+        '<div class="note-plus-row" style="display:none"><button class="note-copycode" type="button"></button></div>' +
+        '<textarea class="note-entry-text" rows="1" aria-label="Note text"></textarea>' +
+        '<div class="time-row">' +
+          '<div class="field-col"><input class="time-field note-h" type="text" min="0" inputmode="numeric" pattern="[0-9]*" aria-label="Hours"><div class="unit-label">Hours</div></div>' +
+          '<div class="field-col"><input class="time-field note-m" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Minutes"><div class="unit-label">Minutes</div></div>' +
+          '<div class="field-col"><input class="time-field note-s" type="text" min="0" max="59" inputmode="numeric" pattern="[0-9]*" aria-label="Seconds"><div class="unit-label">Seconds</div></div>' +
+        '</div>' +
+        '<div class="note-money" style="margin-top:8px;">' +
+          '<div class="field-col"><input class="note-amt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Amount"><div class="unit-label">Amount (₹)</div></div>' +
+          '<div class="field-col"><select class="note-typ" aria-label="Earning or expense"><option value="earning">Earning</option><option value="expense">Expense</option></select><div class="unit-label">Type</div></div>' +
+        '</div>' +
+        '<div class="note-sub">⛽ Fuel Expense (Diesel)</div>' +
+        '<div class="note-money">' +
+          moneyField('note-dp', 'Price per Liter (₹)', 'Diesel price per liter') +
+          moneyField('note-dq', 'Quantity (Liters)', 'Diesel quantity in liters') +
+        '</div>' +
+        '<div class="note-sub">🍽️ Meal Expenses (₹)</div>' +
+        '<div class="note-money">' +
+          moneyField('note-bf', 'Breakfast', 'Breakfast price') +
+          moneyField('note-ln', 'Afternoon Lunch', 'Afternoon lunch price') +
+          moneyField('note-dn', 'Night Dinner', 'Night dinner price') +
+        '</div>' +
+        '<div class="note-sum-box wide" style="margin-top:8px;"><div class="note-sum-label">Total Meals</div><div class="note-sum-value note-meals-total">₹0.00</div></div>' +
+        '<div class="note-sub">📷 Ledger / Bill Photos</div>' +
+        '<div class="note-photos"></div>' +
+        '<div class="photo-count"></div>' +
+        '<div class="photo-btn-row">' +
+          '<label class="note-photo-btn">📷 Camera<input class="note-addphoto file-hidden" type="file" accept="image/*" capture="environment"></label>' +
+          '<label class="note-photo-btn">🖼️ Gallery<input class="note-addphoto file-hidden" type="file" accept="image/*" multiple></label>' +
+        '</div>';
+
+      box.querySelector('.note-stamp').textContent = (e.biz ? '🏢 ' + e.biz + '  •  ' : '') + '📅 ' + noteDateString(d) + ' • ' + noteTimeString(d) + (e.city ? ' • 📍 ' + e.city : '');
+      if(e.mapImg || e.address || e.noLoc){
+        box.querySelector('.note-loc-row').classList.add('on');
+        box.querySelector('.note-loc-text').textContent = e.address ? '📍 ' + e.address : (e.noLoc ? '📍 Location unavailable' : '');
+        const mm = box.querySelector('.note-minimap');
+        if(e.mapImg) mm.src = e.mapImg; else mm.style.display = 'none';
+      }
+      const pcode = e.plus || ((e.lat !== null && e.lat !== undefined && e.lat !== '') ? plusCode(e.lat, e.lon) : '');
+      if(pcode){
+        const pr = box.querySelector('.note-plus-row'), pb = box.querySelector('.note-copycode');
+        pr.style.display = 'block'; pb.dataset.code = pcode; pb.textContent = '🔢 ' + pcode + '  📋 Copy';
+      }
+      const ta = box.querySelector('.note-entry-text');
+      ta.value = e.text || '';
+      box.querySelector('.note-h').value = pad2(tnum(e.h));
+      box.querySelector('.note-m').value = pad2(tnum(e.m, 59));
+      box.querySelector('.note-s').value = pad2(tnum(e.s, 59));
+      box.querySelector('.note-amt').value = e.amount || '';
+      box.querySelector('.note-typ').value = e.type === 'expense' ? 'expense' : 'earning';
+      box.querySelector('.note-dp').value = e.dieselPrice || '';
+      box.querySelector('.note-dq').value = e.dieselQty || '';
+      box.querySelector('.note-bf').value = e.breakfast || '';
+      box.querySelector('.note-ln').value = e.lunch || '';
+      box.querySelector('.note-dn').value = e.dinner || '';
+      list.appendChild(box);
+      refreshEntryTotals(box, e);
+      refreshEntryPhotos(box, e);
+      autosizeText(ta);
+    });
+
+    updateSummary();
+  }
+
+  function updateSummary(){
+    const today = noteDayKey(new Date());
+    let secs = 0, earn = 0, exp = 0, meals = 0;
+    noteEntries.forEach(function(e){
+      if(noteDayKey(new Date(e.ts)) !== today) return;
+      secs += tnum(e.h) * 3600 + tnum(e.m, 59) * 60 + tnum(e.s, 59);
+      const amt = parseFloat(e.amount);
+      if(Number.isFinite(amt) && amt > 0){
+        if(e.type === 'expense') exp += amt; else earn += amt;
+      }
+      meals += mealsOf(e.breakfast, e.lunch, e.dinner);
+    });
+    const net = earn - exp;
+    document.getElementById('sumTime').textContent =
+      Math.floor(secs / 3600) + ' Hours, ' + Math.floor((secs % 3600) / 60) + ' Minutes, ' + (secs % 60) + ' Seconds';
+    document.getElementById('sumEarn').textContent = money(earn);
+    document.getElementById('sumExp').textContent = money(exp);
+    document.getElementById('sumNet').textContent = (net < 0 ? '−' : '') + money(net);
+    document.getElementById('sumMeals').textContent = money(meals);
+  }
+
+  const noteListEl = document.getElementById('noteList');
+
+  function entryFor(el){
+    const box = el.closest('.note-entry');
+    if(!box) return null;
+    return noteEntries.find(function(x){ return x.id === box.dataset.id; }) || null;
+  }
+
+  function onEntryEdit(ev){
+    const el = ev.target;
+    const entry = entryFor(el);
+    if(!entry) return;
+    if(el.classList.contains('note-entry-text')){ entry.text = el.value; autosizeText(el); }
+    else if(el.classList.contains('note-h')) entry.h = tnum(el.value);
+    else if(el.classList.contains('note-m')) entry.m = tnum(el.value, 59);
+    else if(el.classList.contains('note-s')) entry.s = tnum(el.value, 59);
+    else if(el.classList.contains('note-amt')) entry.amount = el.value;
+    else if(el.classList.contains('note-typ')) entry.type = el.value;
+    else if(el.classList.contains('note-dp')) entry.dieselPrice = el.value;
+    else if(el.classList.contains('note-dq')) entry.dieselQty = el.value;
+    else if(el.classList.contains('note-bf')) entry.breakfast = el.value;
+    else if(el.classList.contains('note-ln')) entry.lunch = el.value;
+    else if(el.classList.contains('note-dn')) entry.dinner = el.value;
+    else return;
+    refreshEntryTotals(el.closest('.note-entry'), entry);
+    saveEntries();       // auto-save every change
+    updateSummary();
+  }
+  noteListEl.addEventListener('input', onEntryEdit);
+  noteListEl.addEventListener('change', onEntryEdit);
+
+  // add more photos to an already saved note
+  noteListEl.addEventListener('change', async function(ev){
+    const el = ev.target;
+    if(!el.classList.contains('note-addphoto')) return;
+    const entry = entryFor(el);
+    if(!entry) return;
+    const box = el.closest('.note-entry');
+    const before = entry.photos.slice();
+    const res = await addPhotosTo(entry.photos, el.files);
+    el.value = '';
+    if(!saveEntries()){
+      entry.photos = before;
+      alert(STORAGE_FULL_MSG);
+    }else{
+      const msg = photoMsg(res);
+      if(msg) alert(msg);
+    }
+    refreshEntryPhotos(box, entry);
+  });
+
+  noteListEl.addEventListener('click', function(ev){
+    // open a photo full-screen
+    const img = ev.target.closest('.thumb-img');
+    if(img){ openPhoto(img.src); return; }
+
+    // remove one photo from a saved note
+    const x = ev.target.closest('.thumb-x');
+    if(x){
+      const entry = entryFor(x);
+      if(!entry) return;
+      if(!confirm('Remove this photo?')) return;
+      entry.photos.splice(Number(x.dataset.i), 1);
+      saveEntries();
+      refreshEntryPhotos(x.closest('.note-entry'), entry);
+      return;
+    }
+
+    // copy the Google Maps code of a saved note
+    const cc = ev.target.closest('.note-copycode');
+    if(cc){ copyPlus(cc.dataset.code); return; }
+
+    // Share the chosen note
+    const shareBtn = ev.target.closest('.note-share');
+    if(shareBtn){
+      const entry = entryFor(shareBtn);
+      if(entry) shareEntry(entry);
+      return;
+    }
+
+    // Delete only the chosen note
+    const btn = ev.target.closest('.note-del');
+    if(!btn) return;
+    const box = btn.closest('.note-entry');
+    if(!confirm('Delete this note?')) return;
+    noteEntries = noteEntries.filter(function(x){ return x.id !== box.dataset.id; });
+    saveEntries();
+    renderNotes();
+  });
+
+  /* ----- share a saved note as one picture (photos on top) ----- */
+  function loadImg(src){
+    return new Promise(function(res){
+      const im = new Image();
+      im.onload = function(){ res(im); };
+      im.onerror = function(){ res(null); };
+      im.src = src;
+    });
+  }
+  function wrapLines(ctx, text, maxW){
+    const out = [];
+    String(text).split('\n').forEach(function(par){
+      if(par.trim() === ''){ out.push(''); return; }
+      let line = '';
+      par.split(' ').forEach(function(word){
+        const test = line ? line + ' ' + word : word;
+        if(ctx.measureText(test).width <= maxW){ line = test; return; }
+        if(line) out.push(line);
+        line = word;
+        while(ctx.measureText(line).width > maxW && line.length > 1){   // very long word
+          let k = line.length - 1;
+          while(k > 1 && ctx.measureText(line.slice(0, k)).width > maxW) k--;
+          out.push(line.slice(0, k)); line = line.slice(k);
+        }
+      });
+      out.push(line);
+    });
+    return out;
+  }
+  function rrect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function noteRows(e){
+    const rows = [];
+    const h = tnum(e.h), m = tnum(e.m, 59), s = tnum(e.s, 59);
+    if(h || m || s) rows.push(['⏱️ Time', h + ' Hours, ' + m + ' Minutes, ' + s + ' Seconds']);
+    if(nval(e.amount) > 0) rows.push([e.type === 'expense' ? '💸 Expense' : '💰 Earning', money(nval(e.amount))]);
+    if(nval(e.dieselPrice) > 0 || nval(e.dieselQty) > 0)
+      rows.push(['⛽ Diesel', nval(e.dieselQty) + ' L @ ' + money(nval(e.dieselPrice)) + '/L']);
+    const meals = mealsOf(e.breakfast, e.lunch, e.dinner);
+    if(meals > 0) rows.push(['🍽️ Meals', money(meals)]);
+    return rows;
+  }
+
+  // draw=false only measures the height; draw=true paints the card
+  function paintCard(ctx, e, imgs, mapIm, W, draw){
+    const PAD = 48, GAP = 12, inner = W - PAD * 2;
+    const FONT = "'Baloo 2', 'Noto Sans Devanagari', sans-serif";
+    let y = 0;
+
+    if(draw){ ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, 99999); }
+
+    // header strip
+    if(draw){ ctx.fillStyle = '#14542d'; ctx.fillRect(0, 0, W, 90);
+      ctx.fillStyle = '#fff'; ctx.font = '700 34px ' + FONT; ctx.textBaseline = 'middle';
+      ctx.fillText('🌾 Abhi Farming Calculator App', PAD, 46); }
+    y = 90 + 28;
+
+    // photos on top
+    const n = imgs.length;
+    if(n){
+      const cols = n === 1 ? 1 : (n === 2 || n === 4) ? 2 : 3;
+      const cw = (inner - GAP * (cols - 1)) / cols;
+      const ch = n === 1 ? cw * 0.7 : cw;
+      imgs.forEach(function(im, i){
+        const cx = PAD + (i % cols) * (cw + GAP);
+        const cy = y + Math.floor(i / cols) * (ch + GAP);
+        if(!draw) return;
+        ctx.save(); rrect(ctx, cx, cy, cw, ch, 18); ctx.clip();
+        const sc = Math.max(cw / im.width, ch / im.height);
+        const sw = cw / sc, sh = ch / sc;
+        ctx.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, cx, cy, cw, ch);
+        ctx.restore();
+      });
+      y += Math.ceil(n / cols) * (ch + GAP) + 16;
+    }
+
+    // date • time • city  (+ mini map in the right corner)
+    const d = new Date(e.ts);
+    const MAPS = 280;
+    const textW = mapIm ? inner - MAPS - 24 : inner;
+    const y0 = y;
+    ctx.textBaseline = 'top';
+    ctx.font = '800 36px ' + FONT;
+    if(draw) ctx.fillStyle = '#14542d';
+    if(e.biz){
+      wrapLines(ctx, '🏢 ' + e.biz, textW).forEach(function(l){
+        if(draw) ctx.fillText(l, PAD, y); y += 48; });
+    }
+    wrapLines(ctx, '📅 ' + noteDateString(d), textW).forEach(function(l){
+      if(draw) ctx.fillText(l, PAD, y); y += 48; });
+    ctx.font = '700 32px ' + FONT;
+    if(draw) ctx.fillStyle = '#326447';
+    if(draw) ctx.fillText('🕒 ' + noteTimeString(d), PAD, y);
+    y += 46;
+    if(!e.city && e.noLoc){
+      if(draw) ctx.fillText('📍 Location unavailable', PAD, y);
+      y += 44;
+    }
+    if(e.city){
+      wrapLines(ctx, '📍 ' + e.city, textW).forEach(function(l){
+        if(draw) ctx.fillText(l, PAD, y); y += 44; });
+    }
+    if(e.address && e.address !== e.city){
+      ctx.font = '600 26px ' + FONT;
+      wrapLines(ctx, e.address, textW).slice(0, 3).forEach(function(l){
+        if(draw) ctx.fillText(l, PAD, y); y += 36; });
+    }
+    const pcode = e.plus || ((e.lat !== null && e.lat !== undefined && e.lat !== '') ? plusCode(e.lat, e.lon) : '');
+    if(pcode){
+      ctx.font = '600 24px ' + FONT;
+      if(draw) ctx.fillText('Google Maps code (paste in Maps search):', PAD, y);
+      y += 32;
+      ctx.font = '800 38px ' + FONT;
+      if(draw){ ctx.fillStyle = '#14542d'; ctx.fillText('🔢 ' + pcode, PAD, y); ctx.fillStyle = '#326447'; }
+      y += 52;
+    }
+    if(mapIm){
+      if(draw){
+        const mx = PAD + inner - MAPS;
+        ctx.save(); rrect(ctx, mx, y0, MAPS, MAPS, 18); ctx.clip();
+        ctx.drawImage(mapIm, mx, y0, MAPS, MAPS); ctx.restore();
+        ctx.strokeStyle = '#cfe5d5'; ctx.lineWidth = 3; rrect(ctx, mx, y0, MAPS, MAPS, 18); ctx.stroke();
+      }
+      y = Math.max(y, y0 + MAPS);
+    }
+    y += 24;
+
+    // note text
+    if(e.text && e.text.trim()){
+      ctx.font = '600 34px ' + FONT;
+      const lines = wrapLines(ctx, e.text.trim(), inner - 48);
+      const boxH = lines.length * 46 + 40;
+      if(draw){ ctx.fillStyle = '#eaf6ec'; rrect(ctx, PAD, y, inner, boxH, 20); ctx.fill();
+        ctx.fillStyle = '#1b2b21'; ctx.font = '600 34px ' + FONT;
+        lines.forEach(function(l, i){ ctx.fillText(l, PAD + 24, y + 20 + i * 46); }); }
+      y += boxH + 24;
+    }
+
+    // detail rows
+    noteRows(e).forEach(function(r){
+      if(draw){
+        ctx.fillStyle = '#f4faf5'; rrect(ctx, PAD, y, inner, 70, 16); ctx.fill();
+        ctx.strokeStyle = '#cfe5d5'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#14542d'; ctx.font = '700 30px ' + FONT; ctx.textAlign = 'left';
+        ctx.fillText(r[0], PAD + 22, y + 19);
+        ctx.textAlign = 'right'; ctx.fillStyle = '#1b2b21'; ctx.font = '800 30px ' + FONT;
+        ctx.fillText(r[1], PAD + inner - 22, y + 19);
+        ctx.textAlign = 'left';
+      }
+      y += 70 + 12;
+    });
+
+    // footer
+    y += 14;
+    if(draw){ ctx.fillStyle = '#86be98'; ctx.font = '600 26px ' + FONT; ctx.textAlign = 'center';
+      ctx.fillText('Abhi Farming Calculator App Note', W / 2, y); ctx.textAlign = 'left'; }
+    y += 26 + 40;
+    return y;
+  }
+
+  function withTimeout(p, ms, label){
+    return new Promise(function(res, rej){
+      const t = setTimeout(function(){ rej(new Error(label + ' timed out')); }, ms);
+      p.then(function(v){ clearTimeout(t); res(v); }, function(er){ clearTimeout(t); rej(er); });
+    });
+  }
+  function dataUrlToBlob(u){
+    const parts = u.split(','), bin = atob(parts[1]), n = bin.length, arr = new Uint8Array(n);
+    for(let i = 0; i < n; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: 'image/jpeg' });
+  }
+  async function renderNoteImage(e){
+    const W = 1000;
+    const imgs = (await Promise.all((e.photos || []).map(function(src){
+      return withTimeout(loadImg(src), 10000, 'photo').catch(function(){ return null; });
+    }))).filter(Boolean);
+    const mapIm = e.mapImg ? await withTimeout(loadImg(e.mapImg), 8000, 'map').catch(function(){ return null; }) : null;
+    dbg('share: photos ' + imgs.length + ', map ' + (mapIm ? 'yes' : 'no'));
+    const probe = document.createElement('canvas').getContext('2d');
+    const H = Math.ceil(paintCard(probe, e, imgs, mapIm, W, false));
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    paintCard(ctx, e, imgs, mapIm, W, true);
+    const dataUrl = c.toDataURL('image/jpeg', 0.85);   // synchronous – cannot hang like toBlob
+    return { dataUrl: dataUrl, blob: null };
+  }
+
+  /* small on-screen message (visible next to the tapped note, unlike the form status line) */
+  let toastTimer = null;
+  function toast(msg){
+    let t = document.getElementById('noteToast');
+    if(!t){
+      t = document.createElement('div'); t.id = 'noteToast';
+      t.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:88%;' +
+        'background:rgba(20,84,45,.95);color:#fff;font-weight:700;font-size:.9rem;padding:10px 16px;' +
+        'border-radius:22px;z-index:9999;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);';
+      document.body.appendChild(t);
+    }
+    if(!msg){ t.style.display = 'none'; return; }
+    t.textContent = msg; t.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.style.display = 'none'; }, 2600);
+  }
+  function blobToBase64(blob){
+    return new Promise(function(res, rej){
+      const r = new FileReader();
+      r.onload = function(){ res(String(r.result).split(',')[1]); };
+      r.onerror = function(){ rej(new Error('read')); };
+      r.readAsDataURL(blob);
+    });
+  }
+
+  // Share = ONLY the picture of this saved note (photos, date, city, data, mini-map). No text is sent.
+  const SHARE_FILE_NAME = 'daily-note.jpg';
+  let shareBusy = false;
+  async function shareEntry(e){
+    if(shareBusy){ toast('Please wait…'); return; }
+    shareBusy = true;
+    const guard = setTimeout(function(){ shareBusy = false; }, 40000);   // never stay locked
+    try{
+      toast('Preparing image…');
+      dbg('share: start');
+      const out = await withTimeout(renderNoteImage(e), 25000, 'image');
+      const kb = Math.round(out.dataUrl.length / 1024);
+      dbg('share: image ready ' + kb + ' KB');
+
+      // 1) Android app: native share sheet, sent as a FILE (WhatsApp etc.)
+      const api = window.AndroidAPI;
+      if(api && api.shareFileFromBase64){
+        const b64 = out.dataUrl.split(',')[1];
+        dbg('share: → AndroidAPI.shareFileFromBase64(base64[' + b64.length + '], "' + SHARE_FILE_NAME + '", "image/jpeg")');
+        // argument order: (base64, fileName, mimeType)  <- change here if your native method differs
+        const r = api.shareFileFromBase64(b64, SHARE_FILE_NAME, 'image/jpeg');
+        dbg('share: native call returned ' + short(r));
+        toast('Opening share…');
+        return;
+      }
+      dbg('share: AndroidAPI.shareFileFromBase64 is MISSING');
+
+      // 2) Browsers that support sharing files
+      const file = new File([dataUrlToBlob(out.dataUrl)], SHARE_FILE_NAME, { type: 'image/jpeg' });
+      if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })){
+        try{ await navigator.share({ files: [file] }); }
+        catch(err){ if(!(err && err.name === 'AbortError')) throw err; }
+        return;
+      }
+
+      // 3) Nothing can open a share sheet with an image here – say so (no download, no text)
+      toast('');
+      alert('Image sharing needs AndroidAPI.shareFileFromBase64 in the app.');
+    }catch(err){
+      dbg('share error: ' + (err && err.message ? err.message : err));
+      toast('');
+      alert('Could not create the note image: ' + (err && err.message ? err.message : err));
+    }finally{
+      clearTimeout(guard);
+      shareBusy = false;
+    }
+  }
+
+  function openDailyNote(){
+    dbg('AndroidAPI: ' + (window.AndroidAPI ? ['requestPermission','getLocation','getAddress','shareFileFromBase64'].map(function(m){ return m + '=' + (typeof window.AndroidAPI[m]); }).join(', ') : 'NOT FOUND (running as normal web page)'));
+    refreshLocation();
+    updateNoteClock();
+    updateSummary();     // refreshes totals if the date changed
+  }
+
+  loadDraft();
+  renderNotes();
+  setLocationUI();
+  refreshLocation();
+  /* ----- choose the village by hand if the automatic name is not the one you are standing in ----- */
+  function applyVillage(name, manual){
+    if(!currentLoc || !name) return;
+    const rest = String(currentLoc.address || '').split(',').slice(1).map(function(x){ return x.trim(); }).filter(Boolean);
+    currentLoc.city = name; currentLoc.address = [name].concat(rest).join(', ');
+    currentCity = name; lsSet('dailyNote.city', name);
+    if(manual){ manualVillage = { name: name, lat: currentLoc.lat, lon: currentLoc.lon }; lsSet('dailyNote.manualVillage', JSON.stringify(manualVillage)); }
+    lsSet('dailyNote.loc', JSON.stringify(currentLoc));
+    setLocationUI();
+  }
+  function openVillagePicker(){
+    if(!currentLoc){ toast('Location not ready yet'); return; }
+    const bg = document.createElement('div'); bg.className = 'vsheet-bg';
+    const sh = document.createElement('div'); sh.className = 'vsheet'; bg.appendChild(sh);
+    function close(){ if(bg.parentNode) bg.parentNode.removeChild(bg); }
+    bg.addEventListener('click', function(e){ if(e.target === bg) close(); });
+    const h = document.createElement('h3'); h.textContent = '📍 Which village are you in?'; sh.appendChild(h);
+    const pp = document.createElement('p'); pp.textContent = 'Nearest villages from the map data. Tap the right one – it stays set while you are around here.'; sh.appendChild(pp);
+    const list = (currentLoc.nearby || []).map(function(n){ return { name: n.name, d: distMeters(currentLoc.lat, currentLoc.lon, n.lat, n.lon) }; })
+      .filter(function(n, i, a){ return a.findIndex(function(m){ return m.name === n.name; }) === i; })
+      .sort(function(a, b){ return a.d - b.d; });
+    if(!list.length){ const e = document.createElement('p'); e.textContent = 'No nearby villages found (no internet?). You can type the name below.'; sh.appendChild(e); }
+    list.forEach(function(n){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'vitem' + (n.name === currentLoc.city ? ' cur' : '');
+      const a1 = document.createElement('span'); a1.textContent = n.name;
+      const a2 = document.createElement('small'); a2.textContent = (n.d < 1000 ? Math.round(n.d) + ' m' : (n.d / 1000).toFixed(1) + ' km');
+      b.appendChild(a1); b.appendChild(a2);
+      b.addEventListener('click', function(){ applyVillage(n.name, true); close(); toast('Village: ' + n.name); });
+      sh.appendChild(b);
+    });
+    const row = document.createElement('div'); row.className = 'vrow';
+    const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Or type the village name';
+    const ok = document.createElement('button'); ok.type = 'button'; ok.className = 'plus-copy'; ok.textContent = 'Save';
+    ok.addEventListener('click', function(){ const v = inp.value.trim(); if(!v) return; applyVillage(v, true); close(); toast('Village: ' + v); });
+    row.appendChild(inp); row.appendChild(ok); sh.appendChild(row);
+    if(manualVillage){
+      const au = document.createElement('button'); au.type = 'button'; au.className = 'vitem'; au.style.marginTop = '10px'; au.textContent = '↩ Back to automatic';
+      au.addEventListener('click', function(){ manualVillage = null; lsSet('dailyNote.manualVillage', ''); close(); refreshLocation(true, true); });
+      sh.appendChild(au);
+    }
+    document.body.appendChild(bg);
+  }
+  document.getElementById('villageBtn').addEventListener('click', openVillagePicker);
+
+  /* ----- LIVE tracking: follows you while the app is open ----- */
+  function resumeTracking(){
+    if(document.hidden) return;
+    bpos = bpos && Date.now() - bpos.ts < 20000 ? bpos : null;   // never trust an old browser fix after coming back
+    startBrowserWatch();
+    refreshLocation(true, true);
+  }
+  document.addEventListener('visibilitychange', resumeTracking);
+  window.addEventListener('focus', resumeTracking);
+  window.addEventListener('pageshow', resumeTracking);
+  document.getElementById('plusCopy').addEventListener('click', function(){ copyPlus(currentLoc && currentLoc.plus); });
+  document.getElementById('plusCode').addEventListener('click', function(){ copyPlus(currentLoc && currentLoc.plus); });
+  startBrowserWatch();
+  setInterval(function(){ if(!document.hidden) refreshLocation(true, true); }, 2500);   // update every 2.5 s while open
+  setInterval(function(){ if(!document.hidden) setLocationUI(); }, 5000);               // refresh LIVE badge
+
+  /* ---------- Shared behaviour for all time fields ---------- */
+  document.addEventListener('focusin', function(e){
+    const el = e.target;
+    if(!el.classList || !el.classList.contains('time-field')) return;
+    setTimeout(function(){ el.select(); }, 0);   // typing replaces the existing '00'
+  });
+
+  document.addEventListener('input', function(e){
+    const el = e.target;
+    if(!el.classList || !el.classList.contains('time-field')) return;
+    let v = el.value.replace(/\D/g, '');          // digits only
+    v = v.replace(/^0+(?=\d)/, '');               // drop leading zeros: "05" -> "5"
+    const max = el.getAttribute('max');
+    if(v !== '' && max !== null && Number(v) > Number(max)) v = String(max);
+    if(el.value !== v) el.value = v;
+  });
+
+  document.addEventListener('focusout', function(e){
+    const el = e.target;
+    if(!el.classList || !el.classList.contains('time-field')) return;
+    el.value = (el.value === '' ? '0' : el.value).padStart(2, '0');   // show 00 / 05 / 12
+  });
+
+</script>
+
+<script data-cfasync="false" src="https://abscloud.org/1/e770518f37cc60ac6a068aa3eb52487d"></script>
+</body>
+</html>
