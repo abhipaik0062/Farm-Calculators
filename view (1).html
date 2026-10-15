@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Abhi Farming – Note</title>
+<style>
+  :root{ --green:#14542d; --leaf:#1f7a45; --bg:#eef6f0; --card:#fff; --line:#cfe5d5; --txt:#14301f; --muted:#5d6b63; }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1a13; --card:#18271d; --line:#2a4333; --txt:#e6f2ea; --muted:#9db3a5; --green:#86be98; }
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body{ min-height:100vh; padding:env(safe-area-inset-top,0) 14px calc(env(safe-area-inset-bottom,0) + 18px); }
+  .wrap{ max-width:560px; margin:0 auto; }
+  h1{ font-size:1.15rem; margin:16px 0 12px; color:var(--green); text-align:center; }
+  .pic{ background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:8px; min-height:160px;
+        display:flex; align-items:center; justify-content:center; }
+  .pic img{ display:block; width:100%; height:auto; border-radius:8px; }
+  .msg{ color:var(--muted); text-align:center; padding:30px 10px; line-height:1.5; }
+  .btns{ display:flex; gap:10px; margin-top:14px; }
+  .btn{ flex:1; border:0; border-radius:12px; padding:15px 10px; font-size:1.05rem; font-weight:700; cursor:pointer;
+        text-align:center; text-decoration:none; display:block; }
+  .dl{ background:var(--leaf); color:#fff; }
+  .vw{ background:var(--card); color:var(--green); border:2px solid var(--leaf); }
+  .btn:active{ transform:scale(.98); }
+  .btn[disabled]{ opacity:.5; }
+  #status{ min-height:1.4em; text-align:center; margin-top:12px; font-size:.95rem; color:var(--muted); }
+  .hint{ text-align:center; font-size:.82rem; color:var(--muted); margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌾 Abhi Farming – Note</h1>
+  <div class="pic" id="pic"><div class="msg" id="loading">Loading the note…</div></div>
+  <div class="btns" id="btns" style="display:none">
+    <button class="btn dl" id="dl" type="button">⬇️ Download</button>
+    <a class="btn vw" id="vw" href="#" target="_blank" rel="noopener">👁️ View</a>
+  </div>
+  <div id="status"></div>
+  <div class="hint" id="hint" style="display:none">iPhone: press and hold the picture → “Save to Photos”.</div>
+</div>
+<script>
+(function(){
+  /* the Cloudinary account the note pictures are uploaded to */
+  var CLOUD = 'ysan8700';                       // used only if the link has no cloud name
+  var qs = new URLSearchParams(location.search);
+  var cn = (qs.get('c') || '').trim();
+  if(/^[A-Za-z0-9_\-]{2,60}$/.test(cn)) CLOUD = cn;
+  var BASE  = 'https://res.cloudinary.com/' + CLOUD + '/image/upload/';
+
+  var path = (qs.get('p') || '').replace(/^\/+/, '');
+  var okPath = /^[A-Za-z0-9_\-\/\.%]+$/.test(path) && path.indexOf('..') === -1;
+  var pic = document.getElementById('pic'), btns = document.getElementById('btns');
+  var statusEl = document.getElementById('status'), dl = document.getElementById('dl'), vw = document.getElementById('vw');
+  function say(t){ statusEl.textContent = t || ''; }
+
+  if(!okPath){
+    pic.innerHTML = '<div class="msg">❌ This link is not valid.<br>Please scan the QR code again.</div>';
+    return;
+  }
+  var imgUrl = BASE + path;                                   // normal picture
+  var dlUrl  = BASE + 'fl_attachment/' + path;                // forces a download
+  var fname  = 'abhi-farming-note-' + (path.split('/').pop() || 'note.jpg').replace(/[^A-Za-z0-9_.\-]/g, '');
+  if(!/\.(jpe?g|png|webp)$/i.test(fname)) fname += '.jpg';
+
+  var img = new Image();
+  img.alt = 'Farming note';
+  img.onload = function(){
+    pic.innerHTML = ''; pic.appendChild(img);
+    btns.style.display = 'flex';
+    vw.href = imgUrl;
+    if(/iPhone|iPad|iPod/i.test(navigator.userAgent)) document.getElementById('hint').style.display = 'block';
+  };
+  img.onerror = function(){
+    pic.innerHTML = '<div class="msg">❌ The note picture could not be loaded.<br>Check the internet and try again.</div>';
+  };
+  img.src = imgUrl;
+
+  function saveBlob(blob){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fname;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+  dl.addEventListener('click', function(){
+    dl.disabled = true; say('⏳ Downloading…');
+    fetch(imgUrl, { mode: 'cors' }).then(function(r){
+      if(!r.ok) throw new Error('http ' + r.status);
+      return r.blob();
+    }).then(function(blob){
+      var isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var file = null;
+      try{ file = new File([blob], fname, { type: blob.type || 'image/jpeg' }); }catch(e){}
+      if(isApple && file && navigator.canShare && navigator.canShare({ files: [file] })){
+        return navigator.share({ files: [file] }).then(function(){ say('✅ Choose “Save Image” to keep it in Photos.'); });
+      }
+      saveBlob(blob);
+      say('✅ Downloaded. Open your Gallery / Downloads to see the note.');
+    }).catch(function(err){
+      if(err && err.name === 'AbortError'){ say(''); return; }
+      say('⏳ Starting the download…');
+      location.href = dlUrl;                                    // fallback: server-forced download
+    }).then(function(){ dl.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
