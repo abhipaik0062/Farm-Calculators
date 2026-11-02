@@ -9,7 +9,7 @@
    * 0. SETTINGS - the only things you normally edit
    * ------------------------------------------------------------------ */
   var PROXY_URL = null;              // e.g. 'https://your-server.example/stella' (keeps the key off the device)
-  var DEFAULT_KEY = 'AQ.Ab8RN6JZDOCcE-vXTtPFH75UIVlygCuRO5J2PPe9ig2-2uUOvA';   // your Gemini key
+  var DEFAULT_KEY = '';              // keep EMPTY on a public GitHub repo; the key is typed once on the phone instead
   var KEY_STORE = 'stella.geminiKey';
   var LONG_PRESS_MS = 900;           // hold the mic button this long to change / clear the key
 
