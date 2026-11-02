@@ -2400,11 +2400,7 @@
   ov.addEventListener('click',function(e){if(e.target===ov)close();});
 })();
 </script>
-<button id="stellaMic" type="button" aria-label="Voice commands" aria-pressed="false">&#127908;</button>
-<div id="voiceStatus" role="status" aria-live="polite"></div>
-<script src="stella-voice.js"></script>
-<script src="app-stella.js"></script>
-</body>
+
 <!-- ===== Stella voice assistant ===== -->
 <style>
   #stellaMic{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:60px;z-index:9998;width:42px;height:42px;border-radius:50%;
@@ -2414,12 +2410,20 @@
   #stellaMic.on{background:#d12f26;box-shadow:0 0 0 4px rgba(209,47,38,.35);}
   #voiceStatus{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9998;
     max-width:92%;padding:8px 14px;border-radius:999px;background:rgba(20,40,60,.88);color:#fff;font-size:.85rem;text-align:center;
-    
+    pointer-events:none;}
   #voiceStatus:empty{display:none;}
 </style>
 <button id="stellaMic" type="button" aria-label="Voice commands (hold to change API key)" aria-pressed="false">&#127908;</button>
 <div id="voiceStatus" role="status" aria-live="polite"></div>
-<script src="stella-voice.js"></script>
-<script src="app-stella.js"></script>
+<script src="stella-voice.js" onerror="document.getElementById('voiceStatus').textContent='stella-voice.js file nahi mili'"></script>
+<script src="app-stella.js" onerror="document.getElementById('voiceStatus').textContent='app-stella.js file nahi mili'"></script>
+<script>
+  // Diagnostic: if the Stella scripts did not load, the mic tap says so instead of doing nothing.
+  document.getElementById('stellaMic').addEventListener('click', function () {
+    if (!window.Stella || !window.StellaHandlers) {
+      document.getElementById('voiceStatus').textContent = 'Stella load nahi hua - teeno files ek hi folder me check karo';
+    }
+  });
+</script>
 </body>
 </html>
