@@ -433,11 +433,7 @@ Examples:
         }
         // 'no-speech' and 'aborted' are normal; onend restarts listening
       };
-      rec.onend = function () {
-        if (!wantOn) return;
-        // Browsers stop after silence. Restart, backing off if it keeps ending instantly.
-        restartTimer = setTimeout(begin, Date.now() - startedAt < 1000 ? 1500 : 250);
-      };
+      
       startedAt = Date.now();
       rec.start();
       setStatus('Listening - say "Hey Stella" and a command', 'info');
