@@ -2400,7 +2400,11 @@
   ov.addEventListener('click',function(e){if(e.target===ov)close();});
 })();
 </script>
-
+<button id="stellaMic" type="button" aria-label="Voice commands" aria-pressed="false">&#127908;</button>
+<div id="voiceStatus" role="status" aria-live="polite"></div>
+<script src="stella-voice.js"></script>
+<script src="app-stella.js"></script>
+</body>
 <!-- ===== Stella voice assistant ===== -->
 <style>
   #stellaMic{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:60px;z-index:9998;width:42px;height:42px;border-radius:50%;
